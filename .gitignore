@@ -23,13 +23,16 @@
 *.lib
 
 # Executables
-build/*
 *.out
 *.app
-tm
+build/tm
 
 # Cmake
-*.cmake
-CMakeFiles
-CMakeCache.txt
-Makefile
+build/cmake_install.cmake
+build/CMakeFiles
+build/CMakeCache.txt
+build/Makefile
+
+# Temporary files
+tmp/
+*.db
