@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.14.5)
+set (CMAKE_CXX_STANDARD 11)
+project(tm)
+
+# Bring the headers into project
+include_directories(include)
+
+# Glob cpp files from src
+file(GLOB SOURCES "src/*.cpp")
+
+add_executable(tm ${SOURCES})
