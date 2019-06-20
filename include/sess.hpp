@@ -21,6 +21,9 @@ namespace tm_sess {
         "the length of the session (in min)";
     const std::string INTERRUPT_DESCRIPTION =
         "do not allow the session to be terminated (with ^C)";
+    const std::string OVERTIME_DESCRIPTION =
+        "no overtime means the session will end immediately\nupon reaching the time limit"\
+        "otherwise, the session will keep going until the\nuser stops it";
     const std::string DESC_DESCRIPTION =
         "description of what exaclty you plan to do during the session";
     const std::string LOG_DESCRIPTION =
@@ -31,7 +34,7 @@ namespace tm_sess {
         "display a minimal log of all the sessions";
 
     // functions for handling the different session subcommands
-    void handle_start(double length, bool no_interrupt,
+    void handle_start(double length, bool no_interrupt, bool no_overtime,
                       const std::string &task,
                       const std::string &description);
     void handle_log(bool condensed, int max_sessions);

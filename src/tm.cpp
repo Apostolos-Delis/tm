@@ -30,18 +30,21 @@ int main(int argc, char **argv) {
     std::string sess_desc = "";
     double sess_length;
     bool no_interupt = false;
+    bool no_overtime = false;
     auto session_start = session->add_subcommand("start",
             tm_sess::START_DESCRIPTION);
     session_start->add_option("--task,-t",
             sess_task, tm_sess::TASK_DESCRIPTION);
     session_start->add_option("--length,-l",
             sess_length, tm_sess::LENGTH_DESCRIPTION)->required();
-    session_start->add_flag("--no-interrupt",
+    session_start->add_flag("--no-interrupt,-i",
             no_interupt, tm_sess::INTERRUPT_DESCRIPTION);
+    session_start->add_flag("--no-overtime,-o", no_overtime,
+            tm_sess::OVERTIME_DESCRIPTION);
     session_start->add_option("--description,-d",
             sess_desc, tm_sess::DESC_DESCRIPTION);
     session_start->callback( [&]() {
-            tm_sess::handle_start(sess_length, no_interupt,
+            tm_sess::handle_start(sess_length, no_interupt, no_overtime,
                                   sess_task, sess_desc);
     });
 
@@ -97,20 +100,24 @@ int main(int argc, char **argv) {
 
     // Define task list
     int max_tasks;
-    bool display_done = false;
+    bool display_complete = false;
     std::vector<std::string> specified_tags;
+    std::string specified_date;
     auto task_list = task->add_subcommand("list", tm_task::LIST_DESCRIPTION);
     task_list->add_option("--max,-m", max_tasks, tm_task::MAX_DESCRIPTION);
     task_list->add_flag("--condensed,-c", condensed,
             tm_task::CONDENSED_DESCRIPTION);
-    task_list->add_flag("--display-done,-d", display_done,
+    task_list->add_flag("--display-complete,-f", display_complete,
             tm_task::DISPLAY_DONE_DESCRIPTION);
+    task_list->add_option("--date,-d", specified_date, 
+            tm_task::LIST_DATE_DESCRIPTION);
     task_list->add_option("--tags,-t", specified_tags,
             tm_task::LIST_TAGS_DESCRIPTION);
     task_list->callback( [&]() {
             tm_task::handle_list(condensed, max_tasks,
-                                 display_done,
-                                 specified_tags);
+                                 display_complete,
+                                 specified_tags,
+                                 specified_date);
     });
 
     // Define tm tag
@@ -148,12 +155,15 @@ int main(int argc, char **argv) {
             tm_tag::handle_list(no_color, max_tags);
     });
 
-    auto stat = app.add_subcommand("stat", tm_cli::STAT_DESCRIPTION);
+    //auto stat = app.add_subcommand("stat", tm_cli::STAT_DESCRIPTION);
 
 
     CLI11_PARSE(app, argc, argv);
 
-    if (v_flag) {
+    if (argc == 1) {
+        // Print the help message if just tm is called
+        std::cout << app.help() << std::flush;
+    } else if (v_flag) {
         std::cout << "tm version: " << tm_cli::VERSION << std::endl;
     }
     return 0;

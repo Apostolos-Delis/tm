@@ -29,23 +29,30 @@ namespace tm_task {
     const std::string LIST_DESCRIPTION =
         "display the current tasks used";
     const std::string MAX_DESCRIPTION =
-        "the maximum number of tasks to be displayed, by default,\n tere is no max";
+        "the maximum number of tasks to be displayed, by default,\nthere is no max";
     const std::string CONDENSED_DESCRIPTION =
         "only show the tasks without all their tags or due dates";
     const std::string DISPLAY_DONE_DESCRIPTION =
         "display the completeted tasks along with the incomplete\nones";
     const std::string LIST_TAGS_DESCRIPTION =
         "display only tasks that have a tag that matches one\nof the tags in the specified list";
+    const std::string LIST_DATE_DESCRIPTION =
+        "display only tasks that occur during that date";
+
 
     // functions for handling the different task subcommands
     void handle_rm(const std::string &task_name);
+
     void handle_done(const std::string &task_name);
+
     void handle_add(const std::string &task_name,
                     const std::string &due_date,
                     const std::string &due_time,
                     const std::vector<std::string> &tags);
+
     void handle_list(bool condensed, int max_tags, bool display_done,
-                     const std::vector<std::string> &specified_tags);
+                     const std::vector<std::string> &specified_tags,
+                     const std::string &specified_date);
 
 }
 

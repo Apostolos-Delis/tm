@@ -7,6 +7,7 @@
 #define TAG_HPP_
 
 #include <string>
+#include <ostream>
 
 
 namespace tm_tag {
@@ -33,12 +34,31 @@ namespace tm_tag {
     void handle_add(const std::string &tag_name, std::string color);
     void handle_list(bool no_color, int max_tags);
 
-    // class for defining colors
-    class TagColor {
-        TagColor(std::string color);
-        std::string format_string(std::string input);
-    };
 
+}
+// class for defining colors
+namespace tm_color {
+    enum Code {
+        FG_RED      = 31,
+        FG_GREEN    = 32,
+        FG_BLUE     = 34,
+        FG_DEFAULT  = 39,
+        BG_RED      = 41,
+        BG_GREEN    = 42,
+        BG_BLUE     = 44,
+        BG_DEFAULT  = 49,
+        BG_WHITE    = 47,
+    };
+    class Color {
+    private:
+        Code code_;
+    public:
+        Color(Code pCode) : code_(pCode) {}
+        friend std::ostream&
+        operator<<(std::ostream& os, const Color& mod) {
+            return os << "\033[" << mod.code_ << "m";
+        }
+    };
 }
 
 #endif // TAG_HPP_

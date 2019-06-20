@@ -9,7 +9,7 @@
 #include "sess.hpp"
 
 // Start a session with the specified attributes
-void tm_sess::handle_start(double length, bool no_interupt,
+void tm_sess::handle_start(double length, bool no_interupt, bool no_overtime,
                            const std::string &task,
                            const std::string &description) {
     std::cout << "length: " << length << " task: " << task << std::endl;

@@ -10,7 +10,6 @@ project(tm)
 SET(GCC_COVERAGE_LINK_FLAGS    "-l sqlite3")
 SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}")
 
-
 # Glob cpp files from src
 file(GLOB SOURCES "../src/*.cpp")
 

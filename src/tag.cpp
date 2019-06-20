@@ -29,9 +29,3 @@ void tm_tag::handle_add(const std::string &tag_name, std::string color){
 void tm_tag::handle_list(bool no_color, int max_tags){
 
 }
-
-
-// Tag Color class implementation
-tm_tag::TagColor::TagColor(std::string color){ }
-
-std::string tm_tag::TagColor::format_string(std::string input){ return ""; }

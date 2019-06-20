@@ -31,6 +31,7 @@ void tm_task::handle_add(const std::string &task_name,
 
 // Display all the current tasks
 void tm_task::handle_list(bool condensed, int max_tags, bool display_done,
-                 const std::vector<std::string> &specified_tags) {
+                          const std::vector<std::string> &specified_tags,
+                          const std::string &specified_date) {
 
 }
