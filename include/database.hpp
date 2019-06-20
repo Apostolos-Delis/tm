@@ -9,7 +9,7 @@
 #include <vector>
 #include <sqlite3.h>
 
-#include <tag.hpp>
+#include "tag.hpp"
 
 namespace tm_db {
 
@@ -25,7 +25,7 @@ namespace tm_db {
         std::vector<std::string> tags;
     };
 
-    class TM_DB {
+    class TMDatabase {
     private:
         // Object for handling 
         sqlite3 *db_;
@@ -38,7 +38,7 @@ namespace tm_db {
         void create_sess_table();
         void create_task_tag_table();
     public:
-        TM_DB();
+        TMDatabase();
 
         // Tag related functions
         void insert_tag(const Tag &tag);

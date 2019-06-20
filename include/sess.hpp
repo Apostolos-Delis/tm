@@ -34,7 +34,7 @@ namespace tm_sess {
         "display a minimal log of all the sessions";
 
     // functions for handling the different session subcommands
-    void handle_start(double length, bool no_interrupt, bool no_overtime,
+    void handle_start(int length, bool no_interrupt, bool no_overtime,
                       const std::string &task,
                       const std::string &description);
     void handle_log(bool condensed, int max_sessions);

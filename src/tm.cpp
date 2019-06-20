@@ -28,13 +28,13 @@ int main(int argc, char **argv) {
     // Define sess start
     std::string sess_task;
     std::string sess_desc = "";
-    double sess_length;
+    int sess_length;
     bool no_interupt = false;
     bool no_overtime = false;
     auto session_start = session->add_subcommand("start",
             tm_sess::START_DESCRIPTION);
     session_start->add_option("--task,-t",
-            sess_task, tm_sess::TASK_DESCRIPTION);
+            sess_task, tm_sess::TASK_DESCRIPTION)->required();
     session_start->add_option("--length,-l",
             sess_length, tm_sess::LENGTH_DESCRIPTION)->required();
     session_start->add_flag("--no-interrupt,-i",
