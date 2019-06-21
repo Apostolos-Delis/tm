@@ -4,13 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <sqlite3.h>
 
-#include "CLI11.hpp"
 #include "tm.hpp"
-#include "tag.hpp"
-#include "task.hpp"
-#include "sess.hpp"
 
 
 // Defines the main routine for tm, this function defines all the

@@ -9,7 +9,12 @@
 #include <vector>
 #include <sqlite3.h>
 
-#include "tag.hpp"
+#include "utils.hpp"
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+
 
 namespace tm_db {
 
@@ -27,20 +32,50 @@ namespace tm_db {
 
     class TMDatabase {
     private:
-        // Object for handling 
+        // Object for handling
         sqlite3 *db_;
 
+        /**
+         * Description: gets the id of a tag in the table
+         * @param[in] tag is the tag name in question, if the tag name is
+         * invalid, this function will raise an error and exit
+         * @return returns an int of the id of the tag found in the tags table
+         */
         int tag_id(const std::string &tag);
+
+        /**
+         * Description: gets the id of a task in the table
+         * @param[in] task_name: is the task name in question, if the tag name
+         * is invalid, this function will raise an error and exit
+         * @return returns an int of the id of the tag found in the tags table
+         */
         int task_id(const std::string &task_name);
-        // There are 4 tables in total in the database
+
+        /**
+         * Creates the tags table in the database if the tags table doesn't
+         * already exist
+         * The columns for the table are:
+         *   id: this is an autoincremented int
+         *   name: a string for the task name
+         *   color: a string containing the actual text of the color, like
+         *   "red", or "light-blue"
+         */
         void create_tag_table();
+
         void create_task_table();
         void create_sess_table();
         void create_task_tag_table();
     public:
+        /**
+         * Description: Creates the dotfile directory for tm if it doesn't
+         * already exist, then it opens an instance of a sqlite3 database for
+         * storing all the data from tasks, sessions, and tags
+         */
         TMDatabase();
 
-        // Tag related functions
+        // Deallocates the db_ object
+        ~TMDatabase();
+
         void insert_tag(const Tag &tag);
         void remove_tag(const std::string &tag);
         void list_tags(bool no_color, int max_tags);

@@ -5,27 +5,41 @@
 
 
 #include <string>
+#include <unordered_map>
 
 #include "tag.hpp"
 
 
-// Remove a tag from the database, if hard is specified, the tag
-// will get removed even if there is tasks that use it
+/**
+ * removes a tag from the database
+ * @param[in] tag_name: a string of the tag specific task
+ * @param[in] hard: a bool representing whether to hard remove a tag, this means
+ * that even if other tasks used the tag, it would still be removed
+ */
 void tm_tag::handle_rm(const std::string &tag_name, bool hard){
-
+    auto db = tm_db::TMDatabase();
 }
 
-
-// Add a new tag to the database, will do nothing if the tag
-// already exists
+/**
+ * adds a tag to the database
+ * @param[in] tag_name: a string of the tag specific task
+ * @param[in] color: a color like "red", this will be converted into a
+ * valid ansi color code if the color is valid
+ */
 void tm_tag::handle_add(const std::string &tag_name, std::string color){
+    auto db = tm_db::TMDatabase();
+    tm_db::Tag tag = {tag_name, color};
+    db.insert_tag(tag);
 
 }
 
 
-// display the list of tags, no_color minimizes the amount of information
-// shown, max tags defines the maximum number of tags to print, if
-// max tags is 0, then the amount of tags printed will be all of them
+/**
+ * displays a list of the tags from the database
+ * @param[in] tag_name: a string of the tag specific task
+ * @param[in] color: a color like "red", this will be converted into a
+ * valid ansi color code if the color is valid
+ */
 void tm_tag::handle_list(bool no_color, int max_tags){
-
+    auto db = tm_db::TMDatabase();
 }

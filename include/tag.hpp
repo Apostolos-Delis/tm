@@ -9,6 +9,7 @@
 #include <string>
 #include <ostream>
 
+#include "database.hpp"
 
 namespace tm_tag {
 
@@ -16,7 +17,7 @@ namespace tm_tag {
     const std::string ADD_DESCRIPTION = "add a tag to the list of possible tags";
     const std::string COLOR_DESCRIPTION =
         "specifies the color for the task, must be an ANSI compliant color";
-    const std::string RM_DESCRIPTION = 
+    const std::string RM_DESCRIPTION =
         "remove a an existing tag, will fail if tag is used by any tasks";
     const std::string NAME_DESCRIPTION =
         "required flag to specify the name of the tag being modified";
@@ -29,36 +30,31 @@ namespace tm_tag {
     const std::string NOCOLOR_DESCRIPTION =
         "do not display the colors of the tags, usefull if output is directed to a file";
 
-    // functions for handling the different tag subcommands
+    /**
+     * removes a tag from the database
+     * @param[in] tag_name: a string of the tag specific task
+     * @param[in] hard: a bool representing whether to hard remove a tag, this means
+     * that even if other tasks used the tag, it would still be removed
+     */
     void handle_rm(const std::string &tag_name, bool hard=false);
+
+    /**
+     * adds a tag to the database
+     * @param[in] tag_name: a string of the tag specific task
+     * @param[in] color: a color like "red", this will be converted into a
+     * valid ansi color code if the color is valid
+     */
     void handle_add(const std::string &tag_name, std::string color);
+
+
+    /**
+     * displays a list of the tags from the database
+     * @param[in] tag_name: a string of the tag specific task
+     * @param[in] color: a color like "red", this will be converted into a
+     * valid ansi color code if the color is valid
+     */
     void handle_list(bool no_color, int max_tags);
 
-
-}
-// class for defining colors
-namespace tm_color {
-    enum Code {
-        FG_RED      = 31,
-        FG_GREEN    = 32,
-        FG_BLUE     = 34,
-        FG_DEFAULT  = 39,
-        BG_RED      = 41,
-        BG_GREEN    = 42,
-        BG_BLUE     = 44,
-        BG_DEFAULT  = 49,
-        BG_WHITE    = 47,
-    };
-    class Color {
-    private:
-        Code code_;
-    public:
-        Color(Code pCode) : code_(pCode) {}
-        friend std::ostream&
-        operator<<(std::ostream& os, const Color& mod) {
-            return os << "\033[" << mod.code_ << "m";
-        }
-    };
 }
 
 #endif // TAG_HPP_
