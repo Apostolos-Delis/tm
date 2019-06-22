@@ -76,8 +76,26 @@ namespace tm_db {
         // Deallocates the db_ object
         ~TMDatabase();
 
+        /**
+         * Inserts a tag into the tags table
+         * @param[in] tag: the tag to be inserted
+         */
         void insert_tag(const Tag &tag);
-        void remove_tag(const std::string &tag);
+
+        /**
+         * Inserts a tag into the tags table
+         * @param[in] tag: the name of the tag to be removed
+         * @param[in] hard: if true, will hard remove the tag, this can be
+         * specified with tm tag rm --hard
+         */
+        void remove_tag(const std::string &tag, bool hard);
+
+        /**
+         * Display the tags
+         * @param[in] no_color: will not use color codes to print tags, useful if
+         * the output of this is redirected to a file
+         * @param[in] max_tags: the maximum number of tags to be displayed
+         */
         void list_tags(bool no_color, int max_tags);
 
         // Task related functions

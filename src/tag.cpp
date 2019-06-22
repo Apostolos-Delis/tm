@@ -18,6 +18,7 @@
  */
 void tm_tag::handle_rm(const std::string &tag_name, bool hard){
     auto db = tm_db::TMDatabase();
+    db.remove_tag(tag_name, hard);
 }
 
 /**
@@ -30,7 +31,6 @@ void tm_tag::handle_add(const std::string &tag_name, std::string color){
     auto db = tm_db::TMDatabase();
     tm_db::Tag tag = {tag_name, color};
     db.insert_tag(tag);
-
 }
 
 
@@ -42,4 +42,5 @@ void tm_tag::handle_add(const std::string &tag_name, std::string color){
  */
 void tm_tag::handle_list(bool no_color, int max_tags){
     auto db = tm_db::TMDatabase();
+    db.list_tags(no_color, max_tags);
 }

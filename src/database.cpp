@@ -2,13 +2,13 @@
 // Definitions of everything regarding the internal database that tm manages
 //
 
-//#include <stdio.h>
 #include <stdlib.h>
+#include <sqlite3.h>
 
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <vector>
-#include <sqlite3.h>
 
 #include "database.hpp"
 
@@ -32,7 +32,7 @@ tm_db::TMDatabase::TMDatabase() {
         exit_code = sqlite3_open(db_file.c_str(), &db_);
         if (exit_code) {
             std::cerr << "Error opening database "
-                      << sqlite3_errmsg(db_) << std::endl;
+                      << sqlite3_errmsg(this->db_) << std::endl;
             exit(-1);
         }
     }
@@ -41,7 +41,7 @@ tm_db::TMDatabase::TMDatabase() {
 
 // Closes the database
 tm_db::TMDatabase::~TMDatabase() {
-    sqlite3_close(db_);
+    sqlite3_close(this->db_);
 }
 
 
@@ -52,6 +52,7 @@ tm_db::TMDatabase::~TMDatabase() {
  * @return returns an int of the id of the tag found in the tags table
  */
 int tm_db::TMDatabase::tag_id(const std::string &tag) {
+
     return 0;
 }
 
@@ -78,12 +79,12 @@ int tm_db::TMDatabase::task_id(const std::string &task_name) {
 void tm_db::TMDatabase::create_tag_table() {
     const char* sql = "CREATE TABLE IF NOT EXISTS tags (\n"
             "\tid       INTEGER PRIMARY KEY NOT NULL,\n"
-            "\tname     VARCHAR(64),\n"
+            "\tname     VARCHAR(64) UNIQUE,\n"
             "\tcolor    VARCHAR(32)\n"
             ");";
     char* err_message = NULL;
 
-    int rc = sqlite3_exec(db_, sql, NULL, 0, &err_message);
+    int rc = sqlite3_exec(this->db_, sql, NULL, 0, &err_message);
     if(rc != SQLITE_OK){
         std::cerr << "SQL error creating tags table: "
                   << err_message << std::endl;
@@ -112,19 +113,128 @@ void tm_db::TMDatabase::create_task_tag_table() {
 }
 
 
+/**
+ * Inserts a tag into the tags table
+ * @param[in] tag: the tag to be inserted
+ */
 void tm_db::TMDatabase::insert_tag(const Tag &tag) {
     this->create_tag_table();
 
+    // check to make sure that the color is valid,
+    auto it = tm_color::VALID_COLORS.find(tag.color);
+    if (it == tm_color::VALID_COLORS.end()) {
+        std::cerr << "ERROR: " << tag.color
+                  << " is not a valid color" << std::endl;
+        exit(-1);
+    }
+
+    // Format the string so that name and color are inserted, but
+    // id is autoincremented, by sqlite
+    std::stringstream ss;
+    ss << "INSERT INTO tags (name, color)\nVALUES ('"
+       << tag.name << "', '" << tag.color << "');";
+    std::string sql(ss.str());
+
+    char* err_message = NULL;
+    int rc = sqlite3_exec(this->db_, sql.c_str(), NULL, 0, &err_message);
+    if(rc != SQLITE_OK){
+        std::cerr << "SQL error inserting tag into table: "
+                  << err_message << std::endl;
+        sqlite3_free(err_message);
+    }
 }
 
 
-void tm_db::TMDatabase::remove_tag(const std::string &tag) {
+/**
+ * Inserts a tag into the tags table
+ * @param[in] tag: the name of the tag to be removed
+ * @param[in] hard: if true, will hard remove the tag, this can be
+ * specified with tm tag rm --hard
+ */
+void tm_db::TMDatabase::remove_tag(const std::string &tag, bool hard) {
+    this->create_tag_table();
+    this->create_task_tag_table();
 
+    if (hard) {
+        std::stringstream ss;
+        // This works because the name of the tag must be unique
+        // TODO (21/06/2019): Replace this with tag_id
+        ss << "DELETE FROM tags WHERE name = '" << tag << "';";
+        std::string sql(ss.str());
+
+        char* err_message = NULL;
+        int rc = sqlite3_exec(this->db_, sql.c_str(), NULL, 0, &err_message);
+        if(rc != SQLITE_OK){
+            std::cerr << "SQL error removing tag from table: "
+                      << err_message << std::endl;
+            sqlite3_free(err_message);
+        }
+    } else {
+        // TODO (21/06/2019): Implement the non-hard removal
+    }
 }
 
+/**
+ * Description: callback functions for list_tags, look at sqlite3 documentation
+ * for more information about the different params
+ */
+static int _color_list_tags(void* data, int argc, char** argv, char** cols) {
+    for (int i = 0; i < argc; ++i) {
+        std::cout <<  argv[i] << ',' << cols[i] << std::endl;
+    }
+    std::cout << std::endl;
+    return 0;
+}
 
+/**
+ * Same as above function, but this one supports the no_color option
+ */
+static int _nocolor_list_tags(void* data, int argc, char** argv, char** cols) {
+    std::cout << "no_color" << std::endl;
+    for (int i = 0; i < argc; ++i) {
+        std::cout <<  argv[i] << ',' << cols[i] << std::endl;
+    }
+    std::cout << std::endl;
+    return 0;
+}
+
+/**
+ * Display the tags
+ * @param[in] no_color: will not use color codes to print tags, useful if
+ * the output of this is redirected to a file
+ * @param[in] max_tags: the maximum number of tags to be displayed
+ */
 void tm_db::TMDatabase::list_tags(bool no_color, int max_tags) {
+    this->create_tag_table();
 
+    std::stringstream ss;
+    ss << "SELECT name, color FROM tags";
+    if (max_tags > 0) {
+        ss << " LIMIT " << max_tags;
+    } else if (max_tags < 0) {
+        std::cerr << "ERROR: the -m option must recieve a positive value!"
+                  << std::endl;
+    }
+    ss << ";";
+    std::string sql(ss.str());
+
+    // Select the correct callback
+    sqlite3_callback callback;
+    if (no_color) {
+        callback = _nocolor_list_tags;
+    } else {
+        callback = _color_list_tags;
+    }
+
+    char* err_message = NULL;
+    int rc = sqlite3_exec(this->db_,
+                          sql.c_str(),
+                          callback, 0,
+                          &err_message);
+    if(rc != SQLITE_OK){
+        std::cerr << "SQL error querying tags: " << err_message << std::endl;
+        sqlite3_free(err_message);
+    }
 }
 
 

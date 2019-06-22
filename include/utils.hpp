@@ -6,10 +6,12 @@
 #ifndef UTILS_HPP_
 #define UTILS_HPP_
 
+#include <sys/stat.h>
+
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include <sstream>
-#include <sys/stat.h>
 
 
 namespace tm_utils {
@@ -44,6 +46,18 @@ namespace tm_utils {
 
 // class for defining colors
 namespace tm_color {
+
+    const std::unordered_set<std::string> VALID_COLORS({
+            "red", "light-red",
+            "green", "light-green",
+            "yellow", "light-yellow",
+            "blue", "light-blue",
+            "magenta", "light-magenta",
+            "cyan", "light-cyan",
+            "light-gray", "dark-gray",
+            "black", "white"
+    });
+
     enum Code {
         FG_RED      = 31,
         FG_GREEN    = 32,
