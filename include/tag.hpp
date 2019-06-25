@@ -39,7 +39,7 @@ namespace tm_tag {
     void handle_rm(const std::string &tag_name, bool hard=false);
 
     /**
-     * adds a tag to the database
+     * Inserts a tag into the tags table
      * @param[in] tag_name: a string of the tag specific task
      * @param[in] color: a color like "red", this will be converted into a
      * valid ansi color code if the color is valid

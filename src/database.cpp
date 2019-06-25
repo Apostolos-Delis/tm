@@ -46,6 +46,27 @@ tm_db::TMDatabase::~TMDatabase() {
 
 
 /**
+ * Executes a sql query
+ * @param[in] query: a string containing the query to be run, must be
+ *      sqlite3 SQL
+ * @param[in] callback: static int function, that processes one row
+ *     returned from the query, look at sqlite3 documentation for more
+ *     information on sqlite3_callback
+ * @param[in] err_message: the message to display if there is an error
+ *     with the SQL query
+ */
+void tm_db::TMDatabase::execute_query(const std::string &query,
+                                      const sqlite3_callback callback,
+                                      const std::string &err_message) {
+    char* err = NULL;
+    int rc = sqlite3_exec(this->db_, query.c_str(), callback, 0, &err);
+    if(rc != SQLITE_OK){
+        std::cerr << err_message << ": " << err << std::endl;
+        sqlite3_free(err);
+    }
+}
+
+/**
  * Description: gets the id of a tag in the table
  * @param[in] tag: is the tag name in question, if the tag name is invalid,
  * this function will raise an error and exit
@@ -77,19 +98,13 @@ int tm_db::TMDatabase::task_id(const std::string &task_name) {
  *         or "light-blue"
  */
 void tm_db::TMDatabase::create_tag_table() {
-    const char* sql = "CREATE TABLE IF NOT EXISTS tags (\n"
+    const std::string sql = "CREATE TABLE IF NOT EXISTS tags (\n"
             "\tid       INTEGER PRIMARY KEY NOT NULL,\n"
             "\tname     VARCHAR(64) UNIQUE,\n"
             "\tcolor    VARCHAR(32)\n"
             ");";
-    char* err_message = NULL;
-
-    int rc = sqlite3_exec(this->db_, sql, NULL, 0, &err_message);
-    if(rc != SQLITE_OK){
-        std::cerr << "SQL error creating tags table: "
-                  << err_message << std::endl;
-        sqlite3_free(err_message);
-    }
+    std::string err_message = "SQL error creating tags table";
+    this->execute_query(sql, NULL, err_message);
 }
 
 
@@ -135,13 +150,7 @@ void tm_db::TMDatabase::insert_tag(const Tag &tag) {
        << tag.name << "', '" << tag.color << "');";
     std::string sql(ss.str());
 
-    char* err_message = NULL;
-    int rc = sqlite3_exec(this->db_, sql.c_str(), NULL, 0, &err_message);
-    if(rc != SQLITE_OK){
-        std::cerr << "SQL error inserting tag into table: "
-                  << err_message << std::endl;
-        sqlite3_free(err_message);
-    }
+    this->execute_query(sql, NULL, "SQL error Inserting tag into table");
 }
 
 
@@ -161,14 +170,7 @@ void tm_db::TMDatabase::remove_tag(const std::string &tag, bool hard) {
         // TODO (21/06/2019): Replace this with tag_id
         ss << "DELETE FROM tags WHERE name = '" << tag << "';";
         std::string sql(ss.str());
-
-        char* err_message = NULL;
-        int rc = sqlite3_exec(this->db_, sql.c_str(), NULL, 0, &err_message);
-        if(rc != SQLITE_OK){
-            std::cerr << "SQL error removing tag from table: "
-                      << err_message << std::endl;
-            sqlite3_free(err_message);
-        }
+        this->execute_query(sql, NULL, "SQL error remove tag from table");
     } else {
         // TODO (21/06/2019): Implement the non-hard removal
     }
@@ -225,16 +227,7 @@ void tm_db::TMDatabase::list_tags(bool no_color, int max_tags) {
     } else {
         callback = _color_list_tags;
     }
-
-    char* err_message = NULL;
-    int rc = sqlite3_exec(this->db_,
-                          sql.c_str(),
-                          callback, 0,
-                          &err_message);
-    if(rc != SQLITE_OK){
-        std::cerr << "SQL error querying tags: " << err_message << std::endl;
-        sqlite3_free(err_message);
-    }
+    this->execute_query(sql, callback, "SQL error querying tags");
 }
 
 

@@ -65,6 +65,20 @@ namespace tm_db {
         void create_task_table();
         void create_sess_table();
         void create_task_tag_table();
+
+        /**
+         * Executes a sql query
+         * @param[in] query: a string containing the query to be run, must be
+         *      sqlite3 SQL
+         * @param[in] callback: static int function, that processes one row
+         *     returned from the query, look at sqlite3 documentation for more
+         *     information on sqlite3_callback
+         * @param[in] err_message: the message to display if there is an error
+         *     with the SQL query
+         */
+        void execute_query(const std::string &query,
+                           const sqlite3_callback callback,
+                           const std::string &err_message);
     public:
         /**
          * Description: Creates the dotfile directory for tm if it doesn't
