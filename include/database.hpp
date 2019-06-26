@@ -32,7 +32,7 @@ namespace tm_db {
 
     class TMDatabase {
     private:
-        // Object for handling
+        // database object for handling database operations
         sqlite3 *db_;
 
         /**
@@ -112,10 +112,35 @@ namespace tm_db {
          */
         void list_tags(bool no_color, int max_tags);
 
-        // Task related functions
+
+        /**
+         * Description: Update a task to complete in the tasks table
+         * @param[in] task_name: The name of the task to update to complete
+         */
         void complete_task(const std::string &task_name);
+
+        /**
+         * Description: remove a task from the tasks table
+         * @param[in] task_name: The name of the task to remove
+         */
         void remove_task(const std::string &task);
+
+        /**
+         * Description: adds a new task to the tasks table
+         * @param[in] task: the task to be inserted
+         */
         void add_task(const Task &task);
+
+        /**
+         * Description: display a list of tasks, matching the criteria
+         * @param[in] condensed: display all the tasks with a minimized output
+         * @param[in] max_tasks: the maximum number of tasks to display
+         * @param[in] display_done: if true will also display completed tags that
+         * match the specified criteria
+         * @param[in] specified tags: only display tags that have one of the tags
+         * @param[in] specified date: only display tags that are due on the
+         * specified date
+         */
         void list_tasks(bool condensed, int max_tags, bool display_done,
                         const std::vector<std::string> &specified_tags,
                         const std::string &specified_date);

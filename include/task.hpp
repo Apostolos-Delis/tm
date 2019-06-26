@@ -39,18 +39,42 @@ namespace tm_task {
     const std::string LIST_DATE_DESCRIPTION =
         "display only tasks that occur during that date";
 
-
-    // functions for handling the different task subcommands
+    /**
+     * Description: remove a task from the tasks table
+     * @param[in] task_name: The name of the task to remove
+     * @return Returns
+     */
     void handle_rm(const std::string &task_name);
 
+    /**
+     * Description: Update a task to complete in the tasks table
+     * @param[in] task_name: The name of the task to update to complete
+     */
     void handle_done(const std::string &task_name);
 
+    /**
+     * Description: adds a new task to the tasks table
+     * @param[in] task_name: the name of the task to be added
+     * @param[in] due_date: the date of when the task is due (format: dd-mm-YY)
+     * @param[in] due_time: the time that the task is due (format: HH:MM)
+     * @param[in] tags: list of tags affiliated with the task
+     */
     void handle_add(const std::string &task_name,
                     const std::string &due_date,
                     const std::string &due_time,
                     const std::vector<std::string> &tags);
 
-    void handle_list(bool condensed, int max_tags, bool display_done,
+    /**
+     * Description: display a list of tasks, matching the criteria
+     * @param[in] condensed: display all the tasks with a minimized output
+     * @param[in] max_tasks: the maximum number of tasks to display
+     * @param[in] display_done: if true will also display completed tags that
+     * match the specified criteria
+     * @param[in] specified tags: only display tags that have one of the tags
+     * @param[in] specified date: only display tags that are due on the
+     * specified date
+     */
+    void handle_list(bool condensed, int max_tasks, bool display_done,
                      const std::vector<std::string> &specified_tags,
                      const std::string &specified_date);
 

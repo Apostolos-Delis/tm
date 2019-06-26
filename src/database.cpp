@@ -66,6 +66,7 @@ void tm_db::TMDatabase::execute_query(const std::string &query,
     }
 }
 
+
 /**
  * Description: gets the id of a tag in the table
  * @param[in] tag: is the tag name in question, if the tag name is invalid,
@@ -73,8 +74,19 @@ void tm_db::TMDatabase::execute_query(const std::string &query,
  * @return returns an int of the id of the tag found in the tags table
  */
 int tm_db::TMDatabase::tag_id(const std::string &tag) {
+    sqlite3_stmt* sql;
 
-    return 0;
+    sqlite3_prepare_v2(this->db_, "SELECT id FROM tags WHERE name = ?1", -1, &sql, NULL);
+
+    sqlite3_bind_text(sql, 1, tag.c_str(), -1, SQLITE_STATIC);
+    int tag_id = -1;
+
+    int rc;
+    // On paper, this should only loop once since tag names should be unique
+    while ( (rc = sqlite3_step(sql)) == SQLITE_ROW) {                                              /* 2 */
+        tag_id = sqlite3_column_int(sql, 0);
+    }
+    return tag_id;
 }
 
 
@@ -165,10 +177,10 @@ void tm_db::TMDatabase::remove_tag(const std::string &tag, bool hard) {
     this->create_task_tag_table();
 
     if (hard) {
+        // This removal method does not check to see if other tags exist
+        int tag_id = this->tag_id(tag);
         std::stringstream ss;
-        // This works because the name of the tag must be unique
-        // TODO (21/06/2019): Replace this with tag_id
-        ss << "DELETE FROM tags WHERE name = '" << tag << "';";
+        ss << "DELETE FROM tags WHERE id = " << tag_id << ";";
         std::string sql(ss.str());
         this->execute_query(sql, NULL, "SQL error remove tag from table");
     } else {
@@ -176,15 +188,18 @@ void tm_db::TMDatabase::remove_tag(const std::string &tag, bool hard) {
     }
 }
 
+
+#define SPACE_WIDTH 15
+
 /**
  * Description: callback functions for list_tags, look at sqlite3 documentation
  * for more information about the different params
  */
 static int _color_list_tags(void* data, int argc, char** argv, char** cols) {
-    for (int i = 0; i < argc; ++i) {
-        std::cout <<  argv[i] << ',' << cols[i] << std::endl;
-    }
-    std::cout << std::endl;
+
+    size_t tag_len = strlen(argv[0]);
+    std::string spaces((SPACE_WIDTH - tag_len), ' ');
+    std::cout << argv[0] <<  spaces << argv[1] << std::endl;
     return 0;
 }
 
@@ -192,13 +207,12 @@ static int _color_list_tags(void* data, int argc, char** argv, char** cols) {
  * Same as above function, but this one supports the no_color option
  */
 static int _nocolor_list_tags(void* data, int argc, char** argv, char** cols) {
-    std::cout << "no_color" << std::endl;
-    for (int i = 0; i < argc; ++i) {
-        std::cout <<  argv[i] << ',' << cols[i] << std::endl;
-    }
-    std::cout << std::endl;
+    size_t tag_len = strlen(argv[0]);
+    std::string spaces((SPACE_WIDTH - tag_len), ' ');
+    std::cout << argv[0] <<  spaces << argv[1] << std::endl;
     return 0;
 }
+
 
 /**
  * Display the tags
@@ -223,32 +237,60 @@ void tm_db::TMDatabase::list_tags(bool no_color, int max_tags) {
     // Select the correct callback
     sqlite3_callback callback;
     if (no_color) {
+        std::string spaces((SPACE_WIDTH - 3), ' ');
+        std::string line((SPACE_WIDTH + 5), '-');
+        std::cout << "Tag" << spaces << "Color" << std::endl;
+        std::cout << line << std::endl;
         callback = _nocolor_list_tags;
     } else {
+        std::string spaces((SPACE_WIDTH - 3), ' ');
+        std::cout << "\033[4;49;39mTag" << spaces << "Color\033[0m" << std::endl;
         callback = _color_list_tags;
     }
     this->execute_query(sql, callback, "SQL error querying tags");
 }
 
 
+/**
+ * Description: Update a task to complete in the tasks table
+ * @param[in] task_name: The name of the task to update to complete
+ */
 void tm_db::TMDatabase::complete_task(const std::string &task_name) {
 
 }
 
 
+/**
+ * Description: remove a task from the tasks table
+ * @param[in] task_name: The name of the task to remove
+ */
 void tm_db::TMDatabase::remove_task(const std::string &task) {
 
 }
 
 
+/**
+ * Description: adds a new task to the tasks table
+ * @param[in] task: the task to be inserted
+ */
 void tm_db::TMDatabase::add_task(const Task &task) {
 
 }
 
 
-void list_tasks(bool condensed, int max_tags, bool display_done,
-                const std::vector<std::string> &specified_tags,
-                const std::string &specified_date) {
+/**
+ * Description: display a list of tasks, matching the criteria
+ * @param[in] condensed: display all the tasks with a minimized output
+ * @param[in] max_tasks: the maximum number of tasks to display
+ * @param[in] display_done: if true will also display completed tags that
+ * match the specified criteria
+ * @param[in] specified tags: only display tags that have one of the tags
+ * @param[in] specified date: only display tags that are due on the
+ * specified date
+ */
+void tm_db::TMDatabase::list_tasks(bool condensed, int max_tags, bool display_done,
+                                   const std::vector<std::string> &specified_tags,
+                                   const std::string &specified_date) {
 
 }
 
