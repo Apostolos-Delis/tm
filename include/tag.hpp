@@ -14,7 +14,8 @@
 namespace tm_tag {
 
     // Descriptions of all the possible flags and subcommands
-    const std::string ADD_DESCRIPTION = "add a tag to the list of possible tags";
+    const std::string ADD_DESCRIPTION = 
+        "add a tag to the list of possible tags, updates the tag's color if the tag exists";
     const std::string COLOR_DESCRIPTION =
         "specifies the color for the task, must be an ANSI compliant color";
     const std::string RM_DESCRIPTION =

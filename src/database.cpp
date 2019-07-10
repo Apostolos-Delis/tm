@@ -68,6 +68,42 @@ void tm_db::TMDatabase::execute_query(const std::string &query,
 
 
 /**
+ * Description: Callback for num rows
+ * Reference:
+ * https://stackoverflow.com/questions/21692245/retrieve-sql-table-row-count-with-c
+ */
+static int count_callback(void *count, int argc, char **argv, char **azColName) {
+    int* c = (int*) count;
+    *c = atoi(argv[0]);
+    return 0;
+}
+
+/**
+ * Description: returns the number of entries in a table in the database
+ * @param[in] table: the name of the table to inspect
+ * @return an int of the number of rows in a table, returns -1 if no table
+ * is identified
+ */
+int tm_db::TMDatabase::num_rows(const std::string &table){
+    int num_rows = -1;
+
+    std::stringstream ss;
+    ss << "SELECT COUNT(*) FROM " << table;
+    std::string sql(ss.str());
+
+    char* err_message;
+    int rc = sqlite3_exec(this->db_, sql.c_str(),
+                          count_callback, &num_rows, &err_message);
+    if(rc != SQLITE_OK){
+        std::cerr << "ERROR Reading the number of rows from table '"
+                  << table << "': " << err_message<< std::endl;
+        sqlite3_free(err_message);
+    }
+    return num_rows;
+}
+
+
+/**
  * Description: gets the id of a tag in the table
  * @param[in] tag: is the tag name in question, if the tag name is invalid,
  * this function will raise an error and exit
@@ -136,12 +172,21 @@ void tm_db::TMDatabase::create_sess_table() {
 
 
 void tm_db::TMDatabase::create_task_tag_table() {
-
+    // TODO (09/07/2019): Add foreign key constraint for task_id
+    const std::string sql = "CREATE TABLE IF NOT EXISTS task_tags (\n"
+            "\ttag_id       INTEGER NOT NULL,\n"
+            "\ttask_id       INTEGER NOT NULL,\n"
+            "PRIMARY KEY (tag_id, task_id)\n"
+            "FOREIGN KEY (tag_id) REFERENCES tags(id)"
+            ");";
+    std::string err_message = "SQL error creating task_tags table";
+    this->execute_query(sql, NULL, err_message);
 }
 
 
 /**
- * Inserts a tag into the tags table
+ * Inserts a tag into the tags table, if tag already exists, the color is
+ * updated to reflect the new color selected
  * @param[in] tag: the tag to be inserted
  */
 void tm_db::TMDatabase::insert_tag(const Tag &tag) {
@@ -159,9 +204,10 @@ void tm_db::TMDatabase::insert_tag(const Tag &tag) {
     // id is autoincremented, by sqlite
     std::stringstream ss;
     ss << "INSERT INTO tags (name, color)\nVALUES ('"
-       << tag.name << "', '" << tag.color << "');";
+       << tag.name << "', '" << tag.color << "') "
+       << "ON CONFLICT(name) DO UPDATE SET color = '"
+       << tag.color << "';";
     std::string sql(ss.str());
-
     this->execute_query(sql, NULL, "SQL error Inserting tag into table");
 }
 
@@ -176,15 +222,26 @@ void tm_db::TMDatabase::remove_tag(const std::string &tag, bool hard) {
     this->create_tag_table();
     this->create_task_tag_table();
 
-    if (hard) {
+    int tag_id = this->tag_id(tag);
+
+    // Returns the total number of times that the tag is used by creating a
+    // subquery and treating it as a table
+    std::stringstream ref_ss;
+    ref_ss << "(SELECT * FROM task_tags WHERE task_id = " << tag_id << ")";
+    std::string referenced_sql(ref_ss.str());
+    int num_referenced = this->num_rows(referenced_sql);
+
+    if (hard || num_referenced == 0) {
         // This removal method does not check to see if other tags exist
-        int tag_id = this->tag_id(tag);
         std::stringstream ss;
         ss << "DELETE FROM tags WHERE id = " << tag_id << ";";
         std::string sql(ss.str());
         this->execute_query(sql, NULL, "SQL error remove tag from table");
     } else {
-        // TODO (21/06/2019): Implement the non-hard removal
+        std::cerr << "ERROR: Cannot remove tag '" << tag 
+                  << "' because it is currently referenced by "
+                  << num_referenced << " tasks."<< std::endl;
+        exit(0);
     }
 }
 
@@ -196,12 +253,19 @@ void tm_db::TMDatabase::remove_tag(const std::string &tag, bool hard) {
  * for more information about the different params
  */
 static int _color_list_tags(void* data, int argc, char** argv, char** cols) {
-
     size_t tag_len = strlen(argv[0]);
     std::string spaces((SPACE_WIDTH - tag_len), ' ');
-    std::cout << argv[0] <<  spaces << argv[1] << std::endl;
+
+    std::string color(argv[1]);
+    std::string code = tm_color::COLOR_CODES.find(color)->second;
+
+    //std::cout << "\033[0;43;39mWORLD" << std::endl;
+
+    std::cout << argv[0] <<  spaces << code << argv[1]
+              << tm_color::NOCOLOR << std::endl;
     return 0;
 }
+
 
 /**
  * Same as above function, but this one supports the no_color option
@@ -234,17 +298,17 @@ void tm_db::TMDatabase::list_tags(bool no_color, int max_tags) {
     ss << ";";
     std::string sql(ss.str());
 
+    // Print the top of the table
+    if (this->num_rows("tags") > 0) {
+        std::string spaces((SPACE_WIDTH - 3), ' ');
+        std::cout << "\033[4;49;39mTag" << spaces << "Color\033[0m" << std::endl;
+    }
+
     // Select the correct callback
     sqlite3_callback callback;
     if (no_color) {
-        std::string spaces((SPACE_WIDTH - 3), ' ');
-        std::string line((SPACE_WIDTH + 5), '-');
-        std::cout << "Tag" << spaces << "Color" << std::endl;
-        std::cout << line << std::endl;
         callback = _nocolor_list_tags;
     } else {
-        std::string spaces((SPACE_WIDTH - 3), ' ');
-        std::cout << "\033[4;49;39mTag" << spaces << "Color\033[0m" << std::endl;
         callback = _color_list_tags;
     }
     this->execute_query(sql, callback, "SQL error querying tags");
@@ -305,4 +369,3 @@ void tm_db::TMDatabase::add_sess(const std::string &start,
                                  const std::string &task,
                                  const std::string &description) {
 }
-

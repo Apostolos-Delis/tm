@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include <unordered_map>
 #include <sstream>
 
 
@@ -58,33 +59,44 @@ namespace tm_color {
             "black", "white"
     });
 
-    enum Code {
-        FG_RED      = 31,
-        FG_GREEN    = 32,
-        FG_BLUE     = 34,
-        FG_DEFAULT  = 39,
-        BG_RED      = 41,
-        BG_GREEN    = 42,
-        BG_BLUE     = 44,
-        BG_DEFAULT  = 49,
-        BG_WHITE    = 47,
-    };
-    class Color {
-    private:
-        Code code_;
-    public:
-        Color(Code pCode) : code_(pCode) {}
-        friend std::ostream&
+    const std::string NOCOLOR = "\033[0m";
 
-        /**
-         * modifies an output stream with the appropriate ansi code coloring
-         * @param[out] os: the outout stream
-         * @param[in] mod: the input Color object
-         * @return zero on success, otherwise -1.
-         */
-        operator<<(std::ostream& os, const Color& mod) {
-            return os << "\033[" << mod.code_ << "m";
-        }
+    const std::unordered_map<std::string, std::string> COLOR_CODES = {
+            {"black", "\033[30m"},
+            {"red", "\033[31m"},
+            {"green", "\033[32m"},
+            {"yellow", "\033[33m"},
+            {"blue", "\033[34m"},
+            {"magenta", "\033[35m"},
+            {"cyan", "\033[36m"},
+            {"light-gray", "\033[37m"},
+            {"dark-gray", "\033[90m"},
+            {"light-red", "\033[91m"},
+            {"light-green", "\033[92m"},
+            {"light-yellow", "\033[93m"},
+            {"light-blue", "\033[94m"},
+            {"light-magenta", "\033[95m"},
+            {"light-cyan", "\033[96m"},
+            {"white", "\033[97m"},
+    };
+
+    const std::unordered_map<std::string, std::string> BACKGROUNDS = {
+            {"black", "\033[0;90;39m"},
+            {"red", "\033[0;91;39m"},
+            {"green", "\033[0;92;39m"},
+            {"yellow", "\033[0;93;39m"},
+            {"blue", "\033[0;94;39m"},
+            {"magenta", "\033[0;95;39m"},
+            {"cyan", "\033[0;96;39m"},
+            {"light-gray", "\033[0;97;39m"},
+            {"dark-gray", "\033[0;90;39m"},
+            {"light-red", "\033[0;91;39m"},
+            {"light-green", "\033[0;92;39m"},
+            {"light-yellow", "\033[0;93;39m"},
+            {"light-blue", "\033[0;94;39m"},
+            {"light-magenta", "\033[0;95;39m"},
+            {"light-cyan", "\033[0;96;39m"},
+            {"white", "\033[0;97;39m"},
     };
 }
 

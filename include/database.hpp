@@ -52,6 +52,14 @@ namespace tm_db {
         int task_id(const std::string &task_name);
 
         /**
+         * Description: returns the number of entries in a table in the database 
+         * @param[in] table: the name of the table to inspect
+         * @return an int of the number of rows in a table, returns -1 if no table 
+         * is identified
+         */
+        int num_rows(const std::string &table);
+
+        /**
          * Creates the tags table in the database if the tags table doesn't
          * already exist
          * The columns for the table are:
