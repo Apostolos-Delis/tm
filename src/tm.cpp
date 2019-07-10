@@ -152,7 +152,6 @@ int main(int argc, char **argv) {
 
     //auto stat = app.add_subcommand("stat", tm_cli::STAT_DESCRIPTION);
 
-
     CLI11_PARSE(app, argc, argv);
 
     if (argc == 1) {

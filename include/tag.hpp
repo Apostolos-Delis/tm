@@ -21,7 +21,7 @@ namespace tm_tag {
     const std::string RM_DESCRIPTION =
         "remove a an existing tag, will fail if tag is used by any tasks";
     const std::string NAME_DESCRIPTION =
-        "required flag to specify the name of the tag being modified";
+        "required flag to specify the name of the tag being modified, at most 16 chars";
     const std::string HARD_RM_DESCRIPTION =
         "remove the tag even if it other tasks use it";
     const std::string LIST_DESCRIPTION =

@@ -33,7 +33,7 @@ tm_db::TMDatabase::TMDatabase() {
         if (exit_code) {
             std::cerr << "Error opening database "
                       << sqlite3_errmsg(this->db_) << std::endl;
-            exit(-1);
+            exit(1);
         }
     }
 }
@@ -197,7 +197,7 @@ void tm_db::TMDatabase::insert_tag(const Tag &tag) {
     if (it == tm_color::VALID_COLORS.end()) {
         std::cerr << "ERROR: " << tag.color
                   << " is not a valid color" << std::endl;
-        exit(-1);
+        exit(1);
     }
 
     // Format the string so that name and color are inserted, but
@@ -233,20 +233,23 @@ void tm_db::TMDatabase::remove_tag(const std::string &tag, bool hard) {
 
     if (hard || num_referenced == 0) {
         // This removal method does not check to see if other tags exist
-        std::stringstream ss;
-        ss << "DELETE FROM tags WHERE id = " << tag_id << ";";
-        std::string sql(ss.str());
-        this->execute_query(sql, NULL, "SQL error remove tag from table");
+        std::stringstream ss1, ss2;
+        ss1 << "DELETE FROM tags WHERE id = " << tag_id << ";";
+        this->execute_query(ss1.str(), NULL, "SQL error remove tag from table");
+        if (num_referenced != 0) {
+            ss2 << "DELETE FROM task_tags WHERE tag_id = " << tag_id << ";";
+            this->execute_query(ss2.str(), NULL, "SQL error remove tag from table");
+        }
     } else {
         std::cerr << "ERROR: Cannot remove tag '" << tag 
                   << "' because it is currently referenced by "
                   << num_referenced << " tasks."<< std::endl;
-        exit(0);
+        exit(1);
     }
 }
 
 
-#define SPACE_WIDTH 15
+#define SPACE_WIDTH 20
 
 /**
  * Description: callback functions for list_tags, look at sqlite3 documentation
@@ -258,8 +261,6 @@ static int _color_list_tags(void* data, int argc, char** argv, char** cols) {
 
     std::string color(argv[1]);
     std::string code = tm_color::COLOR_CODES.find(color)->second;
-
-    //std::cout << "\033[0;43;39mWORLD" << std::endl;
 
     std::cout << argv[0] <<  spaces << code << argv[1]
               << tm_color::NOCOLOR << std::endl;

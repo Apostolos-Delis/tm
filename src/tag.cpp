@@ -4,10 +4,13 @@
 //
 
 
+#include <iostream>
 #include <string>
 #include <unordered_map>
 
 #include "tag.hpp"
+
+#define MAX_TAG_LENGTH 16
 
 
 /**
@@ -21,13 +24,21 @@ void tm_tag::handle_rm(const std::string &tag_name, bool hard){
     db.remove_tag(tag_name, hard);
 }
 
+
 /**
  * adds a tag to the database
- * @param[in] tag_name: a string of the tag specific task
+ * @param[in] tag_name: a string of the tag specific task, strlen must be under 
+ * the defined constant MAX_TAG_LENGTH
  * @param[in] color: a color like "red", this will be converted into a
  * valid ansi color code if the color is valid
  */
 void tm_tag::handle_add(const std::string &tag_name, std::string color){
+    if (tag_name.length() > MAX_TAG_LENGTH) {
+        std::cerr << "ERROR: Name of tag, '" << tag_name 
+                  << "' exceeds the maximum length of " << MAX_TAG_LENGTH 
+                  << " characters." << std::endl;
+        exit(1);
+    }
     auto db = tm_db::TMDatabase();
     tm_db::Tag tag = {tag_name, color};
     db.insert_tag(tag);
