@@ -148,8 +148,8 @@ int tm_db::TMDatabase::task_id(const std::string &task_name) {
 void tm_db::TMDatabase::create_tag_table() {
     const std::string sql = "CREATE TABLE IF NOT EXISTS tags (\n"
             "\tid       INTEGER PRIMARY KEY NOT NULL,\n"
-            "\tname     VARCHAR(64) UNIQUE,\n"
-            "\tcolor    VARCHAR(32)\n"
+            "\tname     VARCHAR(20) UNIQUE,\n"
+            "\tcolor    VARCHAR(20)\n"
             ");";
     std::string err_message = "SQL error creating tags table";
     this->execute_query(sql, NULL, err_message);
@@ -160,7 +160,14 @@ void tm_db::TMDatabase::create_tag_table() {
  * Creates the task table in the database if the task table doesn't already exist
  */
 void tm_db::TMDatabase::create_task_table() {
-
+    const std::string sql = "CREATE TABLE IF NOT EXISTS tasks (\n"
+            "\tid       INTEGER PRIMARY KEY NOT NULL,\n"
+            "\tname     VARCHAR(128) UNIQUE,\n"
+            "\tdue      TEXT,\n"
+            "\tcomplete INTEGER DEFAULT 0 NOT NULL\n"
+            ");";
+    std::string err_message = "SQL error creating tasks table";
+    this->execute_query(sql, NULL, err_message);
 }
 
 /**
@@ -320,17 +327,27 @@ void tm_db::TMDatabase::list_tags(bool no_color, int max_tags) {
  * Description: Update a task to complete in the tasks table
  * @param[in] task_name: The name of the task to update to complete
  */
-void tm_db::TMDatabase::complete_task(const std::string &task_name) {
-
+void tm_db::TMDatabase::complete_task(int task_id) {
+    this->create_task_table();
+    std::stringstream ss;
+    ss << "UPDATE TABLE\nSET complete = 1,\nWHERE id = "
+       << task_id << ";";
+    std::string sql(ss.str());
+    this->execute_query(sql, NULL, "SQL error updating task table");
 }
 
 
 /**
  * Description: remove a task from the tasks table
- * @param[in] task_name: The name of the task to remove
+ * @param[in] task_id: The id of the task to remove
  */
-void tm_db::TMDatabase::remove_task(const std::string &task) {
-
+void tm_db::TMDatabase::remove_task(int task_id) {
+    // TODO (11/07/2019): Add a --hard option for if the task is used in a session
+    this->create_task_table();
+    std::stringstream ss;
+    ss << "DELETE FROM tasks WHERE id = " << task_id << ";";
+    std::string sql(ss.str());
+    this->execute_query(sql, NULL, "SQL error removing task from task table");
 }
 
 

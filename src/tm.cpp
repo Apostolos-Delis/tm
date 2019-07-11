@@ -61,24 +61,25 @@ int main(int argc, char **argv) {
     // Define tm task
     auto task = app.add_subcommand("task", tm_cli::TASK_DESCRIPTION);
     task->require_subcommand(1);
-    std::string task_name;
 
     // Define task rm
+    int task_id;
     auto task_rm = task->add_subcommand("rm", tm_task::RM_DESCRIPTION);
-    task_rm->add_option("--name,-n", task_name,
-            tm_task::NAME_DESCRIPTION)->required();
+    task_rm->add_option("--id,-i", task_id,
+            tm_task::ID_DESCRIPTION)->required();
     task_rm->callback( [&]() {
-            tm_task::handle_rm(task_name);
+            tm_task::handle_rm(task_id);
     });
     // Define task done
     auto task_done = task->add_subcommand("done", tm_task::DONE_DESCRIPTION);
-    task_done->add_option("--name,-n", task_name,
-            tm_task::NAME_DESCRIPTION)->required();
+    task_done->add_option("--id,-i", task_id,
+            tm_task::ID_DESCRIPTION)->required();
     task_done->callback( [&]() {
-            tm_task::handle_rm(task_name);
+            tm_task::handle_done(task_id);
     });
 
     // Define task add
+    std::string task_name;
     std::string due_date;
     std::string due_time = "23:59";
     std::vector<std::string> tags;

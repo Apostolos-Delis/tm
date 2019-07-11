@@ -123,15 +123,15 @@ namespace tm_db {
 
         /**
          * Description: Update a task to complete in the tasks table
-         * @param[in] task_name: The name of the task to update to complete
+         * @param[in] task_name: The id of the task to update to complete
          */
-        void complete_task(const std::string &task_name);
+        void complete_task(int task_id);
 
         /**
          * Description: remove a task from the tasks table
-         * @param[in] task_name: The name of the task to remove
+         * @param[in] task_id: The id of the task to remove
          */
-        void remove_task(const std::string &task);
+        void remove_task(int task_id);
 
         /**
          * Description: adds a new task to the tasks table

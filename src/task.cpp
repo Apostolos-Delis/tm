@@ -13,9 +13,9 @@
  * Description: remove a task from the tasks table
  * @param[in] task_name: The name of the task to remove
  */
-void tm_task::handle_rm(const std::string &task_name){
+void tm_task::handle_rm(int task_id) {
     auto db = tm_db::TMDatabase();
-    db.remove_task(task_name);
+    db.remove_task(task_id);
 }
 
 
@@ -23,9 +23,9 @@ void tm_task::handle_rm(const std::string &task_name){
  * Description: Update a task to complete in the tasks table
  * @param[in] task_name: The name of the task to update to complete
  */
-void tm_task::handle_done(const std::string &task_name) {
+void tm_task::handle_done(int task_id) {
     auto db = tm_db::TMDatabase();
-    db.complete_task(task_name);
+    db.complete_task(task_id);
 }
 
 

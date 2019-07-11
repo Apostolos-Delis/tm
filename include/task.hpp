@@ -24,6 +24,8 @@ namespace tm_task {
     const std::string DONE_DESCRIPTION = "complete an existing task";
     const std::string NAME_DESCRIPTION =
         "required flag to specify the name of the task being modified";
+    const std::string ID_DESCRIPTION =
+        "required flag to specify the id of the task being modified";
     const std::string SILENT_DESCRIPTION =
         "fail to remove silently, will not print anything to stderr if rm fails";
     const std::string LIST_DESCRIPTION =
@@ -41,16 +43,16 @@ namespace tm_task {
 
     /**
      * Description: remove a task from the tasks table
-     * @param[in] task_name: The name of the task to remove
+     * @param[in] task_id: The id of the task to remove
      * @return Returns
      */
-    void handle_rm(const std::string &task_name);
+    void handle_rm(int task_id);
 
     /**
      * Description: Update a task to complete in the tasks table
-     * @param[in] task_name: The name of the task to update to complete
+     * @param[in] task_id: The id of the task to update to complete
      */
-    void handle_done(const std::string &task_name);
+    void handle_done(int task_id);
 
     /**
      * Description: adds a new task to the tasks table
