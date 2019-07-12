@@ -1,6 +1,6 @@
 //
 // All the defined constants and functions relevant to tasks, which are
-// stored in a sqlite database inside of ~/.tm.d/database/*
+// stored in a sqlite database inside of ~/.tm.d/data.db
 //
 
 #ifndef TASK_HPP_
@@ -70,7 +70,7 @@ namespace tm_task {
      * Description: display a list of tasks, matching the criteria
      * @param[in] condensed: display all the tasks with a minimized output
      * @param[in] max_tasks: the maximum number of tasks to display
-     * @param[in] display_done: if true will also display completed tags that
+     * @param[in] display_done: if true will also display completed tasks that
      * match the specified criteria
      * @param[in] specified tags: only display tags that have one of the tags
      * @param[in] specified date: only display tags that are due on the

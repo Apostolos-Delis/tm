@@ -111,12 +111,10 @@ int tm_db::TMDatabase::num_rows(const std::string &table){
  */
 int tm_db::TMDatabase::tag_id(const std::string &tag) {
     sqlite3_stmt* sql;
-
     sqlite3_prepare_v2(this->db_, "SELECT id FROM tags WHERE name = ?1", -1, &sql, NULL);
-
     sqlite3_bind_text(sql, 1, tag.c_str(), -1, SQLITE_STATIC);
-    int tag_id = -1;
 
+    int tag_id = -1;
     int rc;
     // On paper, this should only loop once since tag names should be unique
     while ( (rc = sqlite3_step(sql)) == SQLITE_ROW) {                                              /* 2 */
@@ -128,11 +126,32 @@ int tm_db::TMDatabase::tag_id(const std::string &tag) {
 
 /**
  * Description: gets the id of a task in the table
- * @param[in] task_name: is the task name in question, if the tag name is invalid,
+ * @param[in] task_name: is the task name in question, if the task name is invalid,
  * this function will raise an error and exit
- * @return returns an int of the id of the tag found in the tags table
+ * @return returns an int of the id of the tag found in the task table
  */
 int tm_db::TMDatabase::task_id(const std::string &task_name) {
+    sqlite3_stmt* sql;
+    sqlite3_prepare_v2(this->db_, "SELECT id FROM tasks WHERE task = ?1", -1, &sql, NULL);
+    sqlite3_bind_text(sql, 1, task_name.c_str(), -1, SQLITE_STATIC);
+
+    int task_id = -1;
+    int rc;
+    // On paper, this should only loop once since tag names should be unique
+    while ( (rc = sqlite3_step(sql)) == SQLITE_ROW) {                                              /* 2 */
+        task_id = sqlite3_column_int(sql, 0);
+    }
+    return task_id;
+}
+
+
+/**
+ * Description: gets the id of a proj in the table
+ * @param[in] proj_name: is the proj name in question, if the proj name
+ * is invalid, this function will raise an error and exit
+ * @return returns an int of the id of the proj found in the tags table
+ */
+int tm_db::TMDatabase::proj_id(const std::string &task_name) {
     return 0;
 }
 
@@ -141,7 +160,7 @@ int tm_db::TMDatabase::task_id(const std::string &task_name) {
  * Creates the tags table in the database if the tags table doesn't already exist
  * The columns for the table are:
  *  id: this is an autoincremented int
- *  name: a string for the task name
+ *  name: a string for the tag name
  *  color: a string containing the actual text of the color, like "red",
  *         or "light-blue"
  */
@@ -156,13 +175,21 @@ void tm_db::TMDatabase::create_tag_table() {
 }
 
 
+// TODO (11/07/2019): Add a proj_id column as a foreign key
 /**
- * Creates the task table in the database if the task table doesn't already exist
+ * Creates the tasks table in the database if the tasks table doesn't
+ * already exist
+ * The columns for the table are:
+ *   id: this is an autoincremented int
+ *   task: a string for the task to complete
+ *   due: a string containing the date as a string in the following format: 
+ *   YYYY-MM-DD HH:MM:SS.SSS
+ *   complete: boolean for whether a certain task is complete
  */
 void tm_db::TMDatabase::create_task_table() {
     const std::string sql = "CREATE TABLE IF NOT EXISTS tasks (\n"
             "\tid       INTEGER PRIMARY KEY NOT NULL,\n"
-            "\tname     VARCHAR(128) UNIQUE,\n"
+            "\ttask     VARCHAR(128) UNIQUE,\n"
             "\tdue      TEXT,\n"
             "\tcomplete INTEGER DEFAULT 0 NOT NULL\n"
             ");";
@@ -178,13 +205,31 @@ void tm_db::TMDatabase::create_sess_table() {
 }
 
 
+/**
+ * Creates a table for projects
+ * The columns are:
+ *   id: an autincrementing int representing a unique id for projects
+ *   name: the name of the project
+ *   complete: bool representing if the project is complete
+ */
+void tm_db::TMDatabase::create_proj_table() {
+    const std::string sql = "CREATE TABLE IF NOT EXISTS projects (\n"
+            "\tid       INTEGER PRIMARY KEY NOT NULL,\n"
+            "\tname     VARCHAR(64) UNIQUE,\n"
+            "\tcomplete INTEGER DEFAULT 0 NOT NULL\n"
+            ");";
+    std::string err_message = "SQL error creating proj table";
+    this->execute_query(sql, NULL, err_message);
+}
+
+
 void tm_db::TMDatabase::create_task_tag_table() {
-    // TODO (09/07/2019): Add foreign key constraint for task_id
     const std::string sql = "CREATE TABLE IF NOT EXISTS task_tags (\n"
             "\ttag_id       INTEGER NOT NULL,\n"
             "\ttask_id       INTEGER NOT NULL,\n"
             "PRIMARY KEY (tag_id, task_id)\n"
             "FOREIGN KEY (tag_id) REFERENCES tags(id)"
+            "FOREIGN KEY (task_id) REFERENCES tasks(id)"
             ");";
     std::string err_message = "SQL error creating task_tags table";
     this->execute_query(sql, NULL, err_message);
@@ -386,4 +431,50 @@ void tm_db::TMDatabase::add_sess(const std::string &start,
                                  const std::string &stop,
                                  const std::string &task,
                                  const std::string &description) {
+}
+
+
+/**
+ * Description: remove a project from the projects table
+ * @param[in] proj_id: The id of the project to remove
+ * @param[in] hard: If true, then the project gets removed from the database, and
+ * all the tasks that belong to the project have their project set to null
+ * @return Returns
+ */
+void tm_db::TMDatabase::remove_project(int proj_id, bool hard) {
+
+}
+
+
+/**
+ * Description: Set the projects status to complete, if there are still tasks that
+ * reference that project and are unfinished, then this will fail
+ * @param[in] proj_id: The id of the project to complete
+ */
+void tm_db::TMDatabase::complete_project(int proj_id) {
+
+}
+
+
+/**
+ * Description: adds a new project to the project table
+ * @param[in] proj_name: the name of the project to be added
+ */
+void tm_db::TMDatabase::add_project(const std::string &proj_name) {
+
+}
+
+
+/**
+ * Description: display a list of projects, matching the criteria
+ * @param[in] show_tasks: display all the projects with their corresponding tasks
+ * @param[in] display_done: if true will also display completed projects that
+ * match the specified criteria, if the long option is true, displays completed 
+ * tasks as well from those projects
+ * @param[in] proj_ids: only display tasks from those specific projects, this
+ * will automatically set the long option to true
+ */
+void tm_db::TMDatabase::list_projects(bool show_tasks, bool display_done,
+                                    const std::vector<std::string> &proj_ids) {
+
 }

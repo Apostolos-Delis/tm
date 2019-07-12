@@ -1,5 +1,9 @@
 //
 // Definitions of everything regarding the internal database that tm manages
+// TODO (11/07/2019): One day, move all the functionality into the corresponing
+// header files, and have this just be an object that effectively wraps around
+// the sqlite3 methods
+//
 //
 
 #ifndef DATABASE_HPP_
@@ -45,16 +49,24 @@ namespace tm_db {
 
         /**
          * Description: gets the id of a task in the table
-         * @param[in] task_name: is the task name in question, if the tag name
+         * @param[in] task_name: is the task name in question, if the task name
          * is invalid, this function will raise an error and exit
-         * @return returns an int of the id of the tag found in the tags table
+         * @return returns an int of the id of the task found in the tags table
          */
         int task_id(const std::string &task_name);
 
         /**
-         * Description: returns the number of entries in a table in the database 
+         * Description: gets the id of a proj in the table
+         * @param[in] proj_name: is the proj name in question, if the proj name
+         * is invalid, this function will raise an error and exit
+         * @return returns an int of the id of the proj found in the tags table
+         */
+        int proj_id(const std::string &task_name);
+
+        /**
+         * Description: returns the number of entries in a table in the database
          * @param[in] table: the name of the table to inspect
-         * @return an int of the number of rows in a table, returns -1 if no table 
+         * @return an int of the number of rows in a table, returns -1 if no table
          * is identified
          */
         int num_rows(const std::string &table);
@@ -73,6 +85,15 @@ namespace tm_db {
         void create_task_table();
         void create_sess_table();
         void create_task_tag_table();
+
+        /**
+         * Creates a table for projects
+         * The columns are:
+         *   id: an autincrementing int representing a unique id for projects
+         *   name: the name of the project
+         *   completed: bool representing if the project is complete
+         */
+        void create_proj_table();
 
         /**
          * Executes a sql query
@@ -159,6 +180,41 @@ namespace tm_db {
                       const std::string &stop,
                       const std::string &task,
                       const std::string &description);
+
+        /**
+         * Description: remove a project from the projects table
+         * @param[in] proj_id: The id of the project to remove
+         * @param[in] hard: If true, then the project gets removed from the database, and
+         * all the tasks that belong to the project have their project set to null
+         * @return Returns
+         */
+        void remove_project(int proj_id, bool hard);
+
+        /**
+         * Description: Set the projects status to complete, if there are still tasks that
+         * reference that project and are unfinished, then this will fail
+         * @param[in] proj_id: The id of the project to complete
+         */
+        void complete_project(int proj_id);
+
+        /**
+         * Description: adds a new project to the project table
+         * @param[in] proj_name: the name of the project to be added
+         */
+        void add_project(const std::string &proj_name);
+
+        /**
+         * Description: display a list of projects, matching the criteria
+         * @param[in] show_tasks: display all the projects with their corresponding tasks
+         * @param[in] display_done: if true will also display completed projects that
+         * match the specified criteria, if the long option is true, displays completed
+         * tasks as well from those projects
+         * @param[in] proj_ids: only display tasks from those specific projects, this
+         * will automatically set the long option to true
+         */
+        void list_projects(bool show_tasks, bool display_done,
+                         const std::vector<std::string> &proj_ids);
+
     };
 }
 
