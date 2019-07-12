@@ -81,17 +81,20 @@ int main(int argc, char **argv) {
     // Define task add
     std::string task_name;
     std::string due_date;
-    std::string due_time = "23:59";
+    std::string proj_name;
+    std::string due_time = "00:00";
     std::vector<std::string> tags;
     auto task_add = task->add_subcommand("add", tm_task::ADD_DESCRIPTION);
     task_add->add_option("--name,-n", task_name,
             tm_task::NAME_DESCRIPTION)->required();
+    task_add->add_option("--proj,-p", proj_name, tm_task::PROJ_DESCRIPTION);
     task_add->add_option("--date,-d", due_date,
             tm_task::DATE_DESCRIPTION)->required();
     task_add->add_option("--time,-t", due_time, tm_task::TIME_DESCRIPTION);
     task_add->add_option("--tags,-l", tags, tm_task::TAGS_DESCRIPTION);
     task_add->callback( [&]() {
-            tm_task::handle_add(task_name, due_date, due_time, tags);
+            tm_task::handle_add(task_name, proj_name, due_date, 
+                                due_time, tags);
     });
 
     // Define task list
@@ -156,7 +159,6 @@ int main(int argc, char **argv) {
     proj->require_subcommand(1);
 
     // Define proj rm
-    std::string proj_name;
     bool hard = false;
     auto proj_rm = proj->add_subcommand("rm", tm_proj::RM_DESCRIPTION);
     proj_rm->add_option("--name,-n", proj_name,

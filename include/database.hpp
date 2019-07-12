@@ -29,6 +29,7 @@ namespace tm_db {
 
     struct Task {
         std::string name;
+        std::string proj_name;
         std::string due_date;
         std::string due_time;
         std::vector<std::string> tags;

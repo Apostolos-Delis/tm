@@ -190,8 +190,10 @@ void tm_db::TMDatabase::create_task_table() {
     const std::string sql = "CREATE TABLE IF NOT EXISTS tasks (\n"
             "\tid       INTEGER PRIMARY KEY NOT NULL,\n"
             "\ttask     VARCHAR(128) UNIQUE,\n"
+            "\tproj_id  INTEGER DEFAULT 0,\n"
+            "\tcomplete INTEGER DEFAULT 0 NOT NULL,\n"
             "\tdue      TEXT,\n"
-            "\tcomplete INTEGER DEFAULT 0 NOT NULL\n"
+            "FOREIGN KEY (proj_id) REFERENCES projects(id)\n"
             ");";
     std::string err_message = "SQL error creating tasks table";
     this->execute_query(sql, NULL, err_message);
@@ -228,7 +230,7 @@ void tm_db::TMDatabase::create_task_tag_table() {
             "\ttag_id       INTEGER NOT NULL,\n"
             "\ttask_id       INTEGER NOT NULL,\n"
             "PRIMARY KEY (tag_id, task_id)\n"
-            "FOREIGN KEY (tag_id) REFERENCES tags(id)"
+            "FOREIGN KEY (tag_id) REFERENCES tags(id)\n"
             "FOREIGN KEY (task_id) REFERENCES tasks(id)"
             ");";
     std::string err_message = "SQL error creating task_tags table";
@@ -260,7 +262,7 @@ void tm_db::TMDatabase::insert_tag(const Tag &tag) {
        << "ON CONFLICT(name) DO UPDATE SET color = '"
        << tag.color << "';";
     std::string sql(ss.str());
-    this->execute_query(sql, NULL, "SQL error Inserting tag into table");
+    this->execute_query(sql, NULL, "SQL error inserting tag into table");
 }
 
 
@@ -375,7 +377,7 @@ void tm_db::TMDatabase::list_tags(bool no_color, int max_tags) {
 void tm_db::TMDatabase::complete_task(int task_id) {
     this->create_task_table();
     std::stringstream ss;
-    ss << "UPDATE TABLE\nSET complete = 1,\nWHERE id = "
+    ss << "UPDATE tasks\nSET complete = 1\nWHERE id = "
        << task_id << ";";
     std::string sql(ss.str());
     this->execute_query(sql, NULL, "SQL error updating task table");
@@ -442,7 +444,19 @@ void tm_db::TMDatabase::add_sess(const std::string &start,
  * @return Returns
  */
 void tm_db::TMDatabase::remove_project(std::string proj_name, bool hard) {
+    this->create_proj_table();
+    int proj_id = this->proj_id(proj_name);
 
+    if (hard) {
+        // Set all proj_id from tasks to NULL since the project is getting deleted
+        std::stringstream ss;
+        ss << "UPDATE tasks\nSET proj_id = NULL\nWHERE id = " << proj_id;
+        this->execute_query(ss.str(), NULL, 
+                "SQL error updating proj_ids for tasks table");
+    }
+    std::stringstream ss;
+    ss << "DELETE FROM projects WHERE id = " << proj_id << ";";
+    this->execute_query(ss.str(), NULL, "SQL error removing project from table");
 }
 
 
@@ -452,6 +466,13 @@ void tm_db::TMDatabase::remove_project(std::string proj_name, bool hard) {
  * @param[in] proj_name: The name of the project to complete
  */
 void tm_db::TMDatabase::complete_project(std::string proj_name) {
+    this->create_proj_table();
+    int proj_id = this->proj_id(proj_name);
+    std::stringstream ss;
+    ss << "UPDATE projects\nSET complete = 1,\nWHERE id = "
+       << proj_id << ";";
+    std::string sql(ss.str());
+    this->execute_query(sql, NULL, "SQL error updating projects table");
 
 }
 
@@ -461,7 +482,12 @@ void tm_db::TMDatabase::complete_project(std::string proj_name) {
  * @param[in] proj_name: the name of the project to be added
  */
 void tm_db::TMDatabase::add_project(const std::string &proj_name) {
+    this->create_proj_table();
 
+    std::stringstream ss;
+    ss << "INSERT INTO tags (name)\nVALUES ('" << proj_name << "');";
+    std::string sql(ss.str());
+    this->execute_query(sql, NULL, "SQL error Inserting proj into table");
 }
 
 
@@ -476,5 +502,6 @@ void tm_db::TMDatabase::add_project(const std::string &proj_name) {
  */
 void tm_db::TMDatabase::list_projects(bool show_tasks, bool display_done,
                                     const std::vector<std::string> &proj_ids) {
+    this->create_proj_table();
 
 }

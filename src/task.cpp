@@ -32,15 +32,18 @@ void tm_task::handle_done(int task_id) {
 /**
  * Description: adds a new task to the tasks table
  * @param[in] task_name: the name of the task to be added
+ * @param[in] proj_name: the name of the project the task is in, if the
+ * task isn't in a project, this should be an empty string
  * @param[in] due_date: the date of when the task is due (format: dd-mm-YY)
  * @param[in] due_time: the time that the task is due (format: HH:MM)
  * @param[in] tags: list of tags affiliated with the task
  */
 void tm_task::handle_add(const std::string &task_name,
-                const std::string &due_date,
-                const std::string &due_time,
-                const std::vector<std::string> &tags) {
-    tm_db::Task task = {task_name, due_date, due_time, tags};
+                         const std::string &proj_name,
+                         const std::string &due_date,
+                         const std::string &due_time,
+                         const std::vector<std::string> &tags) {
+    tm_db::Task task = {task_name, proj_name, due_date, due_time, tags};
     auto db = tm_db::TMDatabase();
     db.add_task(task);
 }
