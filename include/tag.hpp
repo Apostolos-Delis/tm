@@ -17,19 +17,19 @@ namespace tm_tag {
     const std::string ADD_DESCRIPTION = 
         "add a tag to the list of possible tags, updates the tag's color if the tag exists";
     const std::string COLOR_DESCRIPTION =
-        "specifies the color for the task, must be an ANSI compliant color";
+        "Specifies the color for the task, must be an ANSI compliant color";
     const std::string RM_DESCRIPTION =
-        "remove a an existing tag, will fail if tag is used by any tasks";
+        "Remove a an existing tag, will fail if tag is used by any tasks";
     const std::string NAME_DESCRIPTION =
-        "required flag to specify the name of the tag being modified, at most 16 chars";
+        "Required flag to specify the name of the tag being modified, at most 16 chars";
     const std::string HARD_RM_DESCRIPTION =
-        "remove the tag even if it other tasks use it";
+        "Remove the tag even if it other tasks use it";
     const std::string LIST_DESCRIPTION =
-        "display the current tags used";
+        "Display the current tags used";
     const std::string MAX_DESCRIPTION =
-        "the maximum number of tags to be displayed, by default, there is no max";
+        "The maximum number of tags to be displayed, by default, there is no max";
     const std::string NOCOLOR_DESCRIPTION =
-        "do not display the colors of the tags, usefull if output is directed to a file";
+        "Do not display the colors of the tags, usefull if output is directed to a file";
 
     /**
      * removes a tag from the database

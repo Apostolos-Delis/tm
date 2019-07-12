@@ -151,6 +151,51 @@ int main(int argc, char **argv) {
             tm_tag::handle_list(no_color, max_tags);
     });
 
+    // Define tm proj
+    auto proj = app.add_subcommand("proj", tm_cli::PROJ_DESCRIPTION);
+    proj->require_subcommand(1);
+
+    // Define proj rm
+    std::string proj_name;
+    bool hard = false;
+    auto proj_rm = proj->add_subcommand("rm", tm_proj::RM_DESCRIPTION);
+    proj_rm->add_option("--name,-n", proj_name,
+            tm_proj::NAME_DESCRIPTION)->required();
+    proj_rm->add_flag("--hard", hard, tm_proj::HARD_DESCRIPTION);
+    proj_rm->callback( [&]() {
+            tm_proj::handle_rm(proj_name, hard);
+    });
+
+    // Define proj done
+    auto proj_done = proj->add_subcommand("done", tm_proj::DONE_DESCRIPTION);
+    proj_done->add_option("--name,-n", proj_name,
+            tm_proj::NAME_DESCRIPTION)->required();
+    proj_done->callback( [&]() {
+            tm_proj::handle_done(proj_name);
+    });
+
+    // Define proj add
+    auto proj_add = proj->add_subcommand("add", tm_proj::ADD_DESCRIPTION);
+    proj_add->add_option("--name,-n", proj_name,
+            tm_proj::NAME_DESCRIPTION)->required();
+    proj_add->callback( [&]() {
+            tm_proj::handle_add(proj_name);
+    });
+
+    // Define proj list
+    bool long_format = false;
+    std::vector<std::string> proj_names;
+    void handle_list(bool show_tasks, bool display_done,
+                     const std::vector<std::string> &proj_names);
+    auto proj_list = proj->add_subcommand("list", tm_proj::LIST_DESCRIPTION);
+    proj_list->add_flag("--long,-l", long_format,
+            tm_proj::LONG_DESCRIPTION);
+    proj_list->add_flag("--display-complete,-f", display_complete,
+            tm_proj::DISPLAY_DONE_DESCRIPTION);
+    proj_list->callback( [&]() {
+            tm_proj::handle_list(long_format, display_complete, proj_names);
+    });
+
     //auto stat = app.add_subcommand("stat", tm_cli::STAT_DESCRIPTION);
 
     CLI11_PARSE(app, argc, argv);

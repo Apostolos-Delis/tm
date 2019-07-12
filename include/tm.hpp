@@ -11,6 +11,7 @@
 #include "tag.hpp"
 #include "task.hpp"
 #include "sess.hpp"
+#include "project.hpp"
 
 
 namespace tm_cli {
@@ -23,13 +24,15 @@ namespace tm_cli {
 
     // Subcommand Descriptions
     const std::string SESSION_DESCRIPTION =
-        "creates a work session, for uninterrupted productivity";
+        "Creates a work session, for uninterrupted productivity";
     const std::string TASK_DESCRIPTION =
-        "add and remove tasks from your todo list";
+        "Add and remove tasks from your todo list";
     const std::string TAG_DESCRIPTION =
-        "view and modify tags, which allow for organization of tasks";
+        "View and modify tags, which allow for organization of tasks";
     const std::string STAT_DESCRIPTION =
-        "display personal statistics and progress";
+        "Display personal statistics and progress";
+    const std::string PROJ_DESCRIPTION =
+        "Allows for the modification of projects, which are composed of multiple tasks";
 }
 
 #endif // TM_HPP_

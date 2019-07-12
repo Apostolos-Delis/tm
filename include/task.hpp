@@ -13,33 +13,33 @@
 namespace tm_task {
 
     // Descriptions of all the possible flags and subcommands
-    const std::string ADD_DESCRIPTION = "add a task to the list of tasks";
+    const std::string ADD_DESCRIPTION = "Add a task to the list of tasks";
     const std::string DATE_DESCRIPTION =
-        "the due date of the specified task, input format must be dd/mm/yyyy";
+        "The due date of the specified task, input format must be dd/mm/yyyy";
     const std::string TIME_DESCRIPTION =
-        "the time that a task must be completed by (default is 23:59),\nformat must be: HH:MM";
+        "The time that a task must be completed by (default is 23:59),\nformat must be: HH:MM";
     const std::string TAGS_DESCRIPTION =
-        "list of tags that a task fits under, will fail if any tags are invalid";
-    const std::string RM_DESCRIPTION = "remove an existing task";
-    const std::string DONE_DESCRIPTION = "complete an existing task";
+        "List of tags that a task fits under, will fail if any tags are invalid";
+    const std::string RM_DESCRIPTION = "Remove an existing task";
+    const std::string DONE_DESCRIPTION = "Complete an existing task";
     const std::string NAME_DESCRIPTION =
-        "required flag to specify the name of the task being modified";
+        "Required flag to specify the name of the task being modified";
     const std::string ID_DESCRIPTION =
-        "required flag to specify the id of the task being modified";
+        "Required flag to specify the id of the task being modified";
     const std::string SILENT_DESCRIPTION =
-        "fail to remove silently, will not print anything to stderr if rm fails";
+        "Fail to remove silently, will not print anything to stderr if rm fails";
     const std::string LIST_DESCRIPTION =
-        "display the current tasks used";
+        "Display the current tasks used";
     const std::string MAX_DESCRIPTION =
-        "the maximum number of tasks to be displayed, by default,\nthere is no max";
+        "The maximum number of tasks to be displayed, by default,\nthere is no max";
     const std::string CONDENSED_DESCRIPTION =
-        "only show the tasks without all their tags or due dates";
+        "Only show the tasks without all their tags or due dates";
     const std::string DISPLAY_DONE_DESCRIPTION =
-        "display the completeted tasks along with the incomplete\nones";
+        "Display the completeted tasks along with the incomplete\nones";
     const std::string LIST_TAGS_DESCRIPTION =
-        "display only tasks that have a tag that matches one\nof the tags in the specified list";
+        "Display only tasks that have a tag that matches one\nof the tags in the specified list";
     const std::string LIST_DATE_DESCRIPTION =
-        "display only tasks that occur during that date";
+        "Display only tasks that occur during that date";
 
     /**
      * Description: remove a task from the tasks table

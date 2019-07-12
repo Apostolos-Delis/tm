@@ -436,12 +436,12 @@ void tm_db::TMDatabase::add_sess(const std::string &start,
 
 /**
  * Description: remove a project from the projects table
- * @param[in] proj_id: The id of the project to remove
+ * @param[in] proj_name: The name of the project to remove
  * @param[in] hard: If true, then the project gets removed from the database, and
  * all the tasks that belong to the project have their project set to null
  * @return Returns
  */
-void tm_db::TMDatabase::remove_project(int proj_id, bool hard) {
+void tm_db::TMDatabase::remove_project(std::string proj_name, bool hard) {
 
 }
 
@@ -449,9 +449,9 @@ void tm_db::TMDatabase::remove_project(int proj_id, bool hard) {
 /**
  * Description: Set the projects status to complete, if there are still tasks that
  * reference that project and are unfinished, then this will fail
- * @param[in] proj_id: The id of the project to complete
+ * @param[in] proj_name: The name of the project to complete
  */
-void tm_db::TMDatabase::complete_project(int proj_id) {
+void tm_db::TMDatabase::complete_project(std::string proj_name) {
 
 }
 

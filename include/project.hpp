@@ -14,44 +14,34 @@
 namespace tm_proj {
 
     // Descriptions of all the possible flags and subcommands
-    const std::string ADD_DESCRIPTION = "creates a new project";
-    const std::string RM_DESCRIPTION = "remove an existing project";
-    const std::string HARD_DESCRIPTION = "removes a project even if it is referenced by other tasks";
-    const std::string DONE_DESCRIPTION = "complete an existing task";
     const std::string NAME_DESCRIPTION =
-        "required flag to specify the name of the task being modified";
-    const std::string ID_DESCRIPTION =
-        "required flag to specify the id of the task being modified";
-    const std::string SILENT_DESCRIPTION =
-        "fail to remove silently, will not print anything to stderr if rm fails";
-    const std::string LIST_DESCRIPTION =
-        "display the current tasks used";
-    const std::string MAX_DESCRIPTION =
-        "the maximum number of tasks to be displayed, by default,\nthere is no max";
-    const std::string CONDENSED_DESCRIPTION =
-        "only show the tasks without all their tags or due dates";
+        "Required flag to specify the name of the proj being modified";
+    const std::string ADD_DESCRIPTION = "creates a new project";
+    const std::string RM_DESCRIPTION = "Remove an existing project";
+    const std::string HARD_DESCRIPTION =
+        "removes a project even if it is referenced by other tasks";
+    const std::string DONE_DESCRIPTION = "Complete an existing proj";
+    const std::string LIST_DESCRIPTION = "List all the current projects";
+    const std::string LONG_DESCRIPTION =
+        "Display the tasks along with each project";
     const std::string DISPLAY_DONE_DESCRIPTION =
-        "display the completeted tasks along with the incomplete\nones";
-    const std::string LIST_TAGS_DESCRIPTION =
-        "display only tasks that have a tag that matches one\nof the tags in the specified list";
-    const std::string LIST_DATE_DESCRIPTION =
-        "display only tasks that occur during that date";
+        "Display completed projects as well, if -l is selected, then\n"
+        "completed tasks also get displayed";
 
     /**
      * Description: remove a project from the projects table
-     * @param[in] proj_id: The id of the project to remove
-     * @param[in] hard: If true, then the project gets removed from the database, and
+     * @param[in] proj_name: The name of the project to remove
+     * @param[in] hard: Project gets removed from the database, and
      * all the tasks that belong to the project have their project set to null
-     * @return Returns
      */
-    void handle_rm(int proj_id, bool hard);
+    void handle_rm(std::string proj_name, bool hard);
 
     /**
-     * Description: Set the projects status to complete, if there are still tasks that
-     * reference that project and are unfinished, then this will fail
-     * @param[in] proj_id: The id of the project to complete
+     * Description: Set the projects status to complete, if there are still
+     * tasks that reference that project and are unfinished, raises error
+     * @param[in] proj_name: The name of the project to complete
      */
-    void handle_done(int proj_id);
+    void handle_done(std::string proj_name);
 
     /**
      * Description: adds a new project to the project table
@@ -63,13 +53,13 @@ namespace tm_proj {
      * Description: display a list of projects, matching the criteria
      * @param[in] show_tasks: display all the projects with their corresponding tasks
      * @param[in] display_done: if true will also display completed projects that
-     * match the specified criteria, if the long option is true, displays completed 
+     * match the specified criteria, if the long option is true, displays completed
      * tasks as well from those projects
-     * @param[in] proj_ids: only display tasks from those specific projects, this
+     * @param[in] proj_names: only display tasks from those specific projects, this
      * will automatically set the long option to true
      */
     void handle_list(bool show_tasks, bool display_done,
-                     const std::vector<std::string> &proj_ids);
+                     const std::vector<std::string> &proj_names);
 
 }
 

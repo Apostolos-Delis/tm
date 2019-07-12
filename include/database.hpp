@@ -61,7 +61,7 @@ namespace tm_db {
          * is invalid, this function will raise an error and exit
          * @return returns an int of the id of the proj found in the tags table
          */
-        int proj_id(const std::string &task_name);
+        int proj_id(const std::string &proj_name);
 
         /**
          * Description: returns the number of entries in a table in the database
@@ -183,19 +183,19 @@ namespace tm_db {
 
         /**
          * Description: remove a project from the projects table
-         * @param[in] proj_id: The id of the project to remove
+         * @param[in] proj_name: The name of the project to remove
          * @param[in] hard: If true, then the project gets removed from the database, and
          * all the tasks that belong to the project have their project set to null
          * @return Returns
          */
-        void remove_project(int proj_id, bool hard);
+        void remove_project(std::string proj_name, bool hard);
 
         /**
          * Description: Set the projects status to complete, if there are still tasks that
          * reference that project and are unfinished, then this will fail
-         * @param[in] proj_id: The id of the project to complete
+         * @param[in] proj_name: The name of the project to complete
          */
-        void complete_project(int proj_id);
+        void complete_project(std::string proj_name);
 
         /**
          * Description: adds a new project to the project table
@@ -209,11 +209,11 @@ namespace tm_db {
          * @param[in] display_done: if true will also display completed projects that
          * match the specified criteria, if the long option is true, displays completed
          * tasks as well from those projects
-         * @param[in] proj_ids: only display tasks from those specific projects, this
+         * @param[in] proj_names: only display tasks from those specific projects, this
          * will automatically set the long option to true
          */
         void list_projects(bool show_tasks, bool display_done,
-                         const std::vector<std::string> &proj_ids);
+                           const std::vector<std::string> &proj_names);
 
     };
 }
