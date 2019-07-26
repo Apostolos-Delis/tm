@@ -30,8 +30,7 @@ namespace tm_db {
     struct Task {
         std::string name;
         std::string proj_name;
-        std::string due_date;
-        std::string due_time;
+        std::string due;
         std::vector<std::string> tags;
     };
 
@@ -83,8 +82,28 @@ namespace tm_db {
          */
         void create_tag_table();
 
+        /**
+         * Creates the tasks table in the database if the tasks table doesn't
+         * already exist
+         * The columns for the table are:
+         *   id: this is an autoincremented int
+         *   task: a string for the task to complete
+         *   due: a string containing the date as a string in the following format: 
+         *   YYYY-MM-DD HH:MM:SS.SSS
+         *   complete: boolean for whether a certain task is complete
+         */
         void create_task_table();
+
+
         void create_sess_table();
+
+        /**
+         * Creates a table for projects
+         * The columns are:
+         *   id: an autincrementing int representing a unique id for projects
+         *   name: the name of the project
+         *   complete: bool representing if the project is complete
+         */
         void create_task_tag_table();
 
         /**

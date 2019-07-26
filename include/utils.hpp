@@ -43,6 +43,20 @@ namespace tm_utils {
      * @return string with the home directory of the user calling the function
      */
     std::string home_dir();
+
+    /**
+     * asserts that the date is in proper format and also valid
+     * @param[in] date: a string of the form (ideally) of YYYY-MM-DD
+     * @return Returns true if the date is valid, false otherwise
+     */
+    bool valid_date(std::string date);
+
+    /**
+     * asserts that the time is in proper format and also valid
+     * @param[in] time_str: a string of the form (ideally) of HH:MM
+     * @return Returns true if the date is valid, false otherwise
+     */
+    bool valid_time(std::string time_str);
 }
 
 // class for defining colors

@@ -24,7 +24,7 @@ tm_db::TMDatabase::TMDatabase() {
     std::string tm_dir = homedir + "/.tm.d";
     tm_utils::mkdir(tm_dir.c_str());
 
-    std::string db_file = tm_dir + "/data.db";
+    std::string db_file = tm_dir + "/data.sqlite3";
     int exit_code = sqlite3_open(db_file.c_str(), &db_);
 
     if (exit_code) {
@@ -151,8 +151,18 @@ int tm_db::TMDatabase::task_id(const std::string &task_name) {
  * is invalid, this function will raise an error and exit
  * @return returns an int of the id of the proj found in the tags table
  */
-int tm_db::TMDatabase::proj_id(const std::string &task_name) {
-    return 0;
+int tm_db::TMDatabase::proj_id(const std::string &proj_name) {
+    sqlite3_stmt* sql;
+    sqlite3_prepare_v2(this->db_, "SELECT id FROM projects WHERE name = ?1", -1, &sql, NULL);
+    sqlite3_bind_text(sql, 1, proj_name.c_str(), -1, SQLITE_STATIC);
+
+    int proj_id = -1;
+    int rc;
+    // On paper, this should only loop once since tag names should be unique
+    while ( (rc = sqlite3_step(sql)) == SQLITE_ROW) {                                              /* 2 */
+        proj_id = sqlite3_column_int(sql, 0);
+    }
+    return proj_id;
 }
 
 
@@ -167,15 +177,14 @@ int tm_db::TMDatabase::proj_id(const std::string &task_name) {
 void tm_db::TMDatabase::create_tag_table() {
     const std::string sql = "CREATE TABLE IF NOT EXISTS tags (\n"
             "\tid       INTEGER PRIMARY KEY NOT NULL,\n"
-            "\tname     VARCHAR(20) UNIQUE,\n"
-            "\tcolor    VARCHAR(20)\n"
+            "\tname     VARCHAR(20) UNIQUE NOT NULL,\n"
+            "\tcolor    VARCHAR(20) NOT NULL\n"
             ");";
     std::string err_message = "SQL error creating tags table";
     this->execute_query(sql, NULL, err_message);
 }
 
 
-// TODO (11/07/2019): Add a proj_id column as a foreign key
 /**
  * Creates the tasks table in the database if the tasks table doesn't
  * already exist
@@ -190,7 +199,7 @@ void tm_db::TMDatabase::create_task_table() {
     const std::string sql = "CREATE TABLE IF NOT EXISTS tasks (\n"
             "\tid       INTEGER PRIMARY KEY NOT NULL,\n"
             "\ttask     VARCHAR(128) UNIQUE,\n"
-            "\tproj_id  INTEGER DEFAULT 0,\n"
+            "\tproj_id  INTEGER DEFAULT NULL,\n"
             "\tcomplete INTEGER DEFAULT 0 NOT NULL,\n"
             "\tdue      TEXT,\n"
             "FOREIGN KEY (proj_id) REFERENCES projects(id)\n"
@@ -245,14 +254,6 @@ void tm_db::TMDatabase::create_task_tag_table() {
  */
 void tm_db::TMDatabase::insert_tag(const Tag &tag) {
     this->create_tag_table();
-
-    // check to make sure that the color is valid,
-    auto it = tm_color::VALID_COLORS.find(tag.color);
-    if (it == tm_color::VALID_COLORS.end()) {
-        std::cerr << "ERROR: " << tag.color
-                  << " is not a valid color" << std::endl;
-        exit(1);
-    }
 
     // Format the string so that name and color are inserted, but
     // id is autoincremented, by sqlite
@@ -403,7 +404,32 @@ void tm_db::TMDatabase::remove_task(int task_id) {
  * @param[in] task: the task to be inserted
  */
 void tm_db::TMDatabase::add_task(const Task &task) {
+    this->create_task_table();
+    std::stringstream ss;
+    if (!task.proj_name.empty()) {
 
+        int proj_id = this->proj_id(task.proj_name);
+        if (proj_id == -1) {
+            std::cerr << "ERROR: the project specified for task: '"
+                      << task.name << "' is invalid" << std::endl;
+            std::cerr << "Invalid project: " << task.proj_name << std::endl;
+            exit(1);
+        }
+            //"\tid       INTEGER PRIMARY KEY NOT NULL,\n"
+            //"\ttask     VARCHAR(128) UNIQUE,\n"
+            //"\tproj_id  INTEGER DEFAULT NULL,\n"
+            //"\tcomplete INTEGER DEFAULT 0 NOT NULL,\n"
+            //"\tdue      TEXT,\n"
+
+        ss << "INSERT INTO tasks (task, due, proj_id)\nVALUES('"
+           << task.name << "', '" << task.due << "', " 
+           << proj_id << ") ";
+    } else {
+        ss << "INSERT INTO tasks (task, due)\nVALUES('"
+           << task.name << "', '" << task.due << "') ";
+    }
+    std::string sql(ss.str());
+    this->execute_query(sql, NULL, "SQL error inserting task into table");
 }
 
 
@@ -420,12 +446,12 @@ void tm_db::TMDatabase::add_task(const Task &task) {
 void tm_db::TMDatabase::list_tasks(bool condensed, int max_tags, bool display_done,
                                    const std::vector<std::string> &specified_tags,
                                    const std::string &specified_date) {
-
+    // TODO (25/07/2019): Finish
 }
 
 
 void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
-
+    // TODO (25/07/2019): Finish
 }
 
 
@@ -433,6 +459,7 @@ void tm_db::TMDatabase::add_sess(const std::string &start,
                                  const std::string &stop,
                                  const std::string &task,
                                  const std::string &description) {
+        // TODO (25/07/2019): Finish
 }
 
 
@@ -485,7 +512,7 @@ void tm_db::TMDatabase::add_project(const std::string &proj_name) {
     this->create_proj_table();
 
     std::stringstream ss;
-    ss << "INSERT INTO tags (name)\nVALUES ('" << proj_name << "');";
+    ss << "INSERT INTO projects (name)\nVALUES ('" << proj_name << "');";
     std::string sql(ss.str());
     this->execute_query(sql, NULL, "SQL error Inserting proj into table");
 }
@@ -501,7 +528,7 @@ void tm_db::TMDatabase::add_project(const std::string &proj_name) {
  * will automatically set the long option to true
  */
 void tm_db::TMDatabase::list_projects(bool show_tasks, bool display_done,
-                                    const std::vector<std::string> &proj_ids) {
+                                      const std::vector<std::string> &proj_ids) {
     this->create_proj_table();
-
+    // TODO (25/07/2019): Finish
 }

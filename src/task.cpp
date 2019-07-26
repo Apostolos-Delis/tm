@@ -2,10 +2,12 @@
 // Implementations of the different subroutines for handling task commands
 //
 
+#include <iostream>
 #include <string>
 #include <vector>
 
 #include "task.hpp"
+#include "utils.hpp"
 #include "database.hpp"
 
 
@@ -43,7 +45,17 @@ void tm_task::handle_add(const std::string &task_name,
                          const std::string &due_date,
                          const std::string &due_time,
                          const std::vector<std::string> &tags) {
-    tm_db::Task task = {task_name, proj_name, due_date, due_time, tags};
+    if (!tm_utils::valid_date(due_date)) {
+        std::cerr << "ERROR: '" << due_date 
+                  << "' is not a valid date!" << std::endl;
+        exit(1);
+    } else if (!tm_utils::valid_time(due_time)) {
+        std::cerr << "ERROR: '" << due_time 
+                  << "' is not a valid time!" << std::endl;
+        exit(1);
+    }
+    std::string due;
+    tm_db::Task task = {task_name, proj_name, due, tags};
     auto db = tm_db::TMDatabase();
     db.add_task(task);
 }
