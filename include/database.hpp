@@ -1,6 +1,5 @@
 //
 // Definitions of everything regarding the internal database that tm manages
-// TODO (11/07/2019): One day, move all the functionality into the corresponing
 // header files, and have this just be an object that effectively wraps around
 // the sqlite3 methods
 //

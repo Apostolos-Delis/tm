@@ -409,6 +409,7 @@ void tm_db::TMDatabase::remove_task(int task_id) {
  */
 void tm_db::TMDatabase::add_task(const Task &task) {
     this->create_task_table();
+    this->create_task_tag_table();
     std::stringstream ss;
     if (!task.proj_name.empty()) {
 
@@ -428,6 +429,22 @@ void tm_db::TMDatabase::add_task(const Task &task) {
     }
     std::string sql(ss.str());
     this->execute_query(sql, NULL, "SQL error inserting task into table");
+
+    int task_id = this->task_id(task.name);
+    int tag_id;
+    for (auto tag: task.tags) {
+        tag_id = this->tag_id(tag);
+        if (tag_id == -1) {
+            std::cerr << "ERROR: '" << tag 
+                      << "' is not a valid tag." << std::endl;
+            exit(1);
+        }
+        std::stringstream ss1;
+        ss1 << "INSERT INTO task_tags (task_id, tag_id) VALUES\n"
+            << "("<< task_id << ", " << tag_id << ");";
+        this->execute_query(ss1.str(), NULL, 
+                            "SQL error inserting into task_tag table");
+    }
 }
 
 
@@ -457,6 +474,19 @@ int static list_tasks_callback(void* data, int argc,
 
 
 /**
+ * Description: Callback to display the tags for each task when 
+ * tm task list --long is called
+ */
+int static task_tag_callback(void* data, int argc,
+                             char** argv, char** cols) {
+    std::string color(argv[1]);
+    std::string code = tm_color::COLOR_CODES.find(color)->second;
+
+    std::cout << code << argv[0] << "\033[0m, " << std::flush;
+    return 0;
+}
+
+/**
  * Description: Callback function for list_tags, unfortunantly, because the
  * method has to be static, a new pointer must be created to the directory to
  * query each of the tags for each of the tasks, because of this, this is one
@@ -473,20 +503,57 @@ int static list_tasks_callback_long(void* data, int argc,
                   << sqlite3_errmsg(db) << std::endl;
         exit(1);
     }
+    list_tasks_callback(data, argc, argv, cols);
+    if (argv[4]) {
+        std::cout << "\033[1;39mProject: \033[0m" << argv[4] << std::endl;
+    }
 
-    std::string spaces1(7 - strlen(argv[0]), ' ');
-    std::string spaces2(7 - strlen(argv[0]), ' ');
-    std::string spaces3(7 - strlen(argv[0]), ' ');
-    std::string spaces4(7 - strlen(argv[0]), ' ');
+    /**
+     * Here is the query in a more legible fashion, essentially
+     * get all the tag components relating to this specific task
+     *
+     * SELECT name, color 
+     * FROM tags
+     * WHERE EXISTS (
+     *     SELECT 
+     *         1
+     *     FROM task_tags
+     *  INNER JOIN tasks ON task_tags.task_id = tasks.id
+     *  WHERE tasks.name = 'argv[3]'
+     * )
+     */
+    std::stringstream ss1;
+    ss1 << "SELECT name, color\nFROM tags WHERE EXISTS (\n"
+        << "SELECT 1\nFROM task_tags\n"
+        << "INNER JOIN tasks ON task_tags.task_id = tasks.id\n"
+        << "WHERE tasks.task = '" << argv[3] << "')";
 
-    size_t tag_len = strlen(argv[0]);
-    std::string spaces((SPACE_WIDTH - tag_len), ' ');
+    int num_rows = -1;
 
-    //std::string color(argv[1]);
-    //std::string code = tm_color::COLOR_CODES.find(color)->second;
+    std::stringstream ss;
+    ss << "SELECT COUNT(*) FROM (" << ss1.str() << ")";
 
-    //std::cout << argv[0] <<  spaces << code << argv[1]
-              //<< tm_color::NOCOLOR << std::endl;
+    char* err_message;
+    int rc = sqlite3_exec(db, ss.str().c_str(),
+                          count_callback, &num_rows, &err_message);
+    if(rc != SQLITE_OK){
+        std::cerr << "ERROR getting the number of tags related to task'"
+                  << std::endl;
+        sqlite3_free(err_message);
+    }
+
+    if (num_rows > 0) {
+        std::cout << "\033[1;39mTags: \033[0m";
+        char* err = NULL;
+        rc = sqlite3_exec(db, ss1.str().c_str(), 
+                              task_tag_callback, 0, &err);
+        if(rc != SQLITE_OK){
+            std::cerr << "Error getting tags: " << err << std::endl;
+            sqlite3_free(err);
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
     sqlite3_close(db);
     return 0;
 }
@@ -505,7 +572,6 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
                                    bool display_done,
                                    const std::vector<std::string> &specified_tags,
                                    const std::string &specified_date) {
-    // TODO (25/07/2019): Finish
     this->create_task_table();
 
     int num_tasks;
@@ -516,31 +582,35 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
     }
     if (num_tasks == 0) { return; }
 
+    // Print the top of the table
+    std::string space1(4, ' ');
+    std::string space2(6, ' ');
+    std::cout << "\033[1;4;49;39mID    Done" << space1 
+              << "Due Date / Time" << space2 << "Task\033[0m" << std::endl;
+
     std::stringstream ss;
     if (list_long) {
-        ss << "SELECT * FROM tags";
+        ss << "SELECT tasks.id, tasks.complete, tasks.due, tasks.task, " 
+           << "projects.name FROM tasks"
+           << "\nLEFT JOIN projects ON tasks.proj_id = projects.id\n";
     } else {
         ss << "SELECT id, complete, due, task FROM tasks\n";
-        std::string space1(4, ' ');
-        std::string space2(8, ' ');
-        std::cout << "\033[4;49;39mID    Done" << space1 
-                  << "Due Date/Time" << space2 << "Task\033[0m" << std::endl;
     }
-
+    ss << "WHERE 1 = 1\n";
     if (!display_done) {
-        ss << "WHERE complete = 0\n";
+        ss << "AND tasks.complete = 0\n";
     }
+    // TODO (25/07/2019): Implement specified dates and projects
+
+    ss << "ORDER BY due DESC\n";
 
     if (max_tasks > 0 && num_tasks > max_tasks) {
         ss << " LIMIT " << max_tasks;
     } else if (max_tasks < 0) {
         std::cerr << "ERROR: the -m option must recieve a positive value!"
                   << std::endl;
-    }
-    ss << ";";
+    } 
     std::string sql(ss.str());
-
-    // Print the top of the table
 
     sqlite3_callback callback;
     if (list_long) {
