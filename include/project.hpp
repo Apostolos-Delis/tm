@@ -16,14 +16,21 @@ namespace tm_proj {
     // Descriptions of all the possible flags and subcommands
     const std::string NAME_DESCRIPTION =
         "Required flag to specify the name of the proj being modified";
+
     const std::string ADD_DESCRIPTION = "creates a new project";
+
     const std::string RM_DESCRIPTION = "Remove an existing project";
+
     const std::string HARD_DESCRIPTION =
         "removes a project even if it is referenced by other tasks";
+
     const std::string DONE_DESCRIPTION = "Complete an existing proj";
+
     const std::string LIST_DESCRIPTION = "List all the current projects";
+
     const std::string LONG_DESCRIPTION =
         "Display the tasks along with each project";
+
     const std::string DISPLAY_DONE_DESCRIPTION =
         "Display completed projects as well, if -l is selected, then\n"
         "completed tasks also get displayed";

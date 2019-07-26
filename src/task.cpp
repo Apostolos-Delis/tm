@@ -24,10 +24,11 @@ void tm_task::handle_rm(int task_id) {
 /**
  * Description: Update a task to complete in the tasks table
  * @param[in] task_name: The name of the task to update to complete
+ * @param[in] reversed: if true, set the task to be incomplete
  */
-void tm_task::handle_done(int task_id) {
+void tm_task::handle_done(int task_id, bool reversed) {
     auto db = tm_db::TMDatabase();
-    db.complete_task(task_id);
+    db.complete_task(task_id, reversed ? 0 : 1);
 }
 
 
@@ -46,11 +47,11 @@ void tm_task::handle_add(const std::string &task_name,
                          const std::string &due_time,
                          const std::vector<std::string> &tags) {
     if (!tm_utils::valid_date(due_date)) {
-        std::cerr << "ERROR: '" << due_date 
+        std::cerr << "ERROR: '" << due_date
                   << "' is not a valid date!" << std::endl;
         exit(1);
     } else if (!tm_utils::valid_time(due_time)) {
-        std::cerr << "ERROR: '" << due_time 
+        std::cerr << "ERROR: '" << due_time
                   << "' is not a valid time!" << std::endl;
         exit(1);
     }
@@ -74,6 +75,11 @@ void tm_task::handle_add(const std::string &task_name,
 void tm_task::handle_list(bool list_long, int max_tasks, bool display_done,
                           const std::vector<std::string> &specified_tags,
                           const std::string &specified_date) {
+    if (!specified_date.empty() && !tm_utils::valid_date(specified_date)) {
+        std::cerr << "ERROR: '" << specified_date
+                  << "' is not a valid date!" << std::endl;
+        exit(1);
+    }
     auto db = tm_db::TMDatabase();
     db.list_tasks(list_long, max_tasks, display_done,
                    specified_tags, specified_date);

@@ -71,11 +71,14 @@ int main(int argc, char **argv) {
             tm_task::handle_rm(task_id);
     });
     // Define task done
+    bool reversed;
     auto task_done = task->add_subcommand("done", tm_task::DONE_DESCRIPTION);
     task_done->add_option("--id,-i", task_id,
             tm_task::ID_DESCRIPTION)->required();
+    task_done->add_flag("--reversed,-r", reversed, 
+            tm_task::REVERSED_DESCRIPTION);
     task_done->callback( [&]() {
-            tm_task::handle_done(task_id);
+            tm_task::handle_done(task_id, reversed);
     });
 
     // Define task add
@@ -99,7 +102,7 @@ int main(int argc, char **argv) {
 
     // Define task list
     int max_tasks;
-    bool list_long;
+    bool list_long = false;
     bool display_complete = false;
     std::vector<std::string> specified_tags;
     std::string specified_date;
@@ -188,8 +191,6 @@ int main(int argc, char **argv) {
     // Define proj list
     bool long_format = false;
     std::vector<std::string> proj_names;
-    void handle_list(bool show_tasks, bool display_done,
-                     const std::vector<std::string> &proj_names);
     auto proj_list = proj->add_subcommand("list", tm_proj::LIST_DESCRIPTION);
     proj_list->add_flag("--long,-l", long_format,
             tm_proj::LONG_DESCRIPTION);

@@ -378,11 +378,14 @@ void tm_db::TMDatabase::list_tags(bool no_color, int max_tags) {
 /**
  * Description: Update a task to complete in the tasks table
  * @param[in] task_name: The name of the task to update to complete
+ * @param[in] val: The value for complete to be set to, 0 if it should
+ * be set to incomplete, 1 if complete
+ *
  */
-void tm_db::TMDatabase::complete_task(int task_id) {
+void tm_db::TMDatabase::complete_task(int task_id, int val) {
     this->create_task_table();
     std::stringstream ss;
-    ss << "UPDATE tasks\nSET complete = 1\nWHERE id = "
+    ss << "UPDATE tasks\nSET complete = " << val << "\nWHERE id = "
        << task_id << ";";
     std::string sql(ss.str());
     this->execute_query(sql, NULL, "SQL error updating task table");
@@ -571,43 +574,64 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
                                    const std::string &specified_date) {
     this->create_task_table();
 
-    int num_tasks;
-    if (display_done) {
-        num_tasks = this->num_rows("tasks");
+    std::stringstream ss;
+    if (list_long) {
+        ss << "SELECT DISTINCT tasks.id, tasks.complete, tasks.due, tasks.task, " 
+           << "projects.name FROM tasks"
+           << "\nLEFT JOIN projects ON tasks.proj_id = projects.id\n";
     } else {
-        num_tasks = this->num_rows("(SELECT id FROM tasks WHERE complete = 0)");
+        ss << "SELECT DISTINCT tasks.id, tasks.complete, tasks.due, "
+           << "tasks.task FROM tasks\n";
     }
-    if (num_tasks == 0) { return; }
+    if (!specified_tags.empty()) {
+        ss << "LEFT JOIN task_tags ON tasks.id = task_tags.task_id\n";
+    }
+    ss << "WHERE 1 = 1\n";
+    if (!display_done) {
+        ss << "AND tasks.complete = 0\n";
+    }
+    if (!specified_date.empty()) {
+        ss << "AND date(tasks.due) = date('" << specified_date << "')\n";
+    }
+    if (!specified_tags.empty()) {
+        ss << "AND (";
+        for (int i = 0; i < specified_tags.size(); ++i) {
+            auto tag = specified_tags[i];
+            int tag_id = this->tag_id(tag);
+            if (tag_id == -1) {
+                std::cerr << "ERROR: '" << tag << "' is invalid" << std::endl;
+                exit(1);
+            }
+            if (i != 0) {
+                ss << " OR";
+            }
+            ss << " task_tags.tag_id = " << tag_id;
+        }
+        ss << ")\n";
+        ss << "GROUP BY task_id\n";
+    }
+
+    ss << "ORDER BY due DESC\n";
+
+    if (max_tasks > 0) {
+        ss << " LIMIT " << max_tasks;
+    } else if (max_tasks < 0) {
+        std::cerr << "ERROR: the -m option must recieve a positive value!"
+                  << std::endl;
+        exit(1);
+    } 
+    std::string sql(ss.str());
+
+    int num_tasks = this->num_rows("(" + sql + ")");
+    if (num_tasks == 0) { 
+        return; 
+    }
 
     // Print the top of the table
     std::string space1(4, ' ');
     std::string space2(6, ' ');
     std::cout << "\033[1;4;49;39mID    Done" << space1 
               << "Due Date / Time" << space2 << "Task\033[0m" << std::endl;
-
-    std::stringstream ss;
-    if (list_long) {
-        ss << "SELECT tasks.id, tasks.complete, tasks.due, tasks.task, " 
-           << "projects.name FROM tasks"
-           << "\nLEFT JOIN projects ON tasks.proj_id = projects.id\n";
-    } else {
-        ss << "SELECT id, complete, due, task FROM tasks\n";
-    }
-    ss << "WHERE 1 = 1\n";
-    if (!display_done) {
-        ss << "AND tasks.complete = 0\n";
-    }
-    // TODO (25/07/2019): Implement specified dates and projects for list_tags
-
-    ss << "ORDER BY due DESC\n";
-
-    if (max_tasks > 0 && num_tasks > max_tasks) {
-        ss << " LIMIT " << max_tasks;
-    } else if (max_tasks < 0) {
-        std::cerr << "ERROR: the -m option must recieve a positive value!"
-                  << std::endl;
-    } 
-    std::string sql(ss.str());
 
     sqlite3_callback callback;
     if (list_long) {
@@ -669,7 +693,6 @@ void tm_db::TMDatabase::complete_project(std::string proj_name) {
        << proj_id << ";";
     std::string sql(ss.str());
     this->execute_query(sql, NULL, "SQL error updating projects table");
-
 }
 
 

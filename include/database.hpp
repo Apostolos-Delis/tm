@@ -161,12 +161,13 @@ namespace tm_db {
          */
         void list_tags(bool no_color, int max_tags);
 
-
         /**
          * Description: Update a task to complete in the tasks table
          * @param[in] task_name: The id of the task to update to complete
+         * @param[in] val: The value for complete to be set to, 0 if it should
+         * be set to incomplete, 1 if complete
          */
-        void complete_task(int task_id);
+        void complete_task(int task_id, int val);
 
         /**
          * Description: remove a task from the tasks table
