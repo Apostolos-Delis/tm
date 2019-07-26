@@ -361,7 +361,7 @@ void tm_db::TMDatabase::list_tags(bool no_color, int max_tags) {
     // Print the top of the table
     if (this->num_rows("tags") > 0) {
         std::string spaces((SPACE_WIDTH - 3), ' ');
-        std::cout << "\033[4;49;39mTag" << spaces << "Color\033[0m" << std::endl;
+        std::cout << "\033[1;4;49;39mTag" << spaces << "Color\033[0m" << std::endl;
     }
 
     // Select the correct callback
@@ -394,7 +394,6 @@ void tm_db::TMDatabase::complete_task(int task_id) {
  * @param[in] task_id: The id of the task to remove
  */
 void tm_db::TMDatabase::remove_task(int task_id) {
-    // TODO (11/07/2019): Add a --hard option for if the task is used in a session
     this->create_task_table();
     std::stringstream ss;
     ss << "DELETE FROM tasks WHERE id = " << task_id << ";";
@@ -512,21 +511,19 @@ int static list_tasks_callback_long(void* data, int argc,
      * Here is the query in a more legible fashion, essentially
      * get all the tag components relating to this specific task
      *
-     * SELECT name, color 
+     * SELECT 
+     *      tags.name,
+     *      tags.color,
      * FROM tags
-     * WHERE EXISTS (
-     *     SELECT 
-     *         1
-     *     FROM task_tags
-     *  INNER JOIN tasks ON task_tags.task_id = tasks.id
-     *  WHERE tasks.name = 'argv[3]'
-     * )
+     * INNER JOIN task_tags ON task_tags.tag_id = tags.id
+     * INNER JOIN tasks ON task_tags.task_id = tasks.id
+     * WHERE tasks.name = 'argv[3]'
      */
     std::stringstream ss1;
-    ss1 << "SELECT name, color\nFROM tags WHERE EXISTS (\n"
-        << "SELECT 1\nFROM task_tags\n"
+    ss1 << "SELECT name, color\nFROM tags\n"
+        << "INNER JOIN task_tags ON task_tags.tag_id = tags.id\n"
         << "INNER JOIN tasks ON task_tags.task_id = tasks.id\n"
-        << "WHERE tasks.task = '" << argv[3] << "')";
+        << "WHERE tasks.task = '" << argv[3] << "'";
 
     int num_rows = -1;
 
@@ -538,7 +535,7 @@ int static list_tasks_callback_long(void* data, int argc,
                           count_callback, &num_rows, &err_message);
     if(rc != SQLITE_OK){
         std::cerr << "ERROR getting the number of tags related to task'"
-                  << std::endl;
+                  "\nSQL ERROR: " << err_message << std::endl;
         sqlite3_free(err_message);
     }
 
@@ -600,7 +597,7 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
     if (!display_done) {
         ss << "AND tasks.complete = 0\n";
     }
-    // TODO (25/07/2019): Implement specified dates and projects
+    // TODO (25/07/2019): Implement specified dates and projects for list_tags
 
     ss << "ORDER BY due DESC\n";
 
@@ -623,7 +620,7 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
 
 
 void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
-    // TODO (25/07/2019): Finish
+    // TODO (25/07/2019): Finish sess log
 }
 
 
@@ -631,7 +628,7 @@ void tm_db::TMDatabase::add_sess(const std::string &start,
                                  const std::string &stop,
                                  const std::string &task,
                                  const std::string &description) {
-        // TODO (25/07/2019): Finish
+        // TODO (25/07/2019): Finish add_sess
 }
 
 
@@ -702,5 +699,5 @@ void tm_db::TMDatabase::add_project(const std::string &proj_name) {
 void tm_db::TMDatabase::list_projects(bool show_tasks, bool display_done,
                                       const std::vector<std::string> &proj_ids) {
     this->create_proj_table();
-    // TODO (25/07/2019): Finish
+    // TODO (25/07/2019): Finish list projects
 }
