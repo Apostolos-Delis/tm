@@ -99,13 +99,14 @@ int main(int argc, char **argv) {
 
     // Define task list
     int max_tasks;
+    bool list_long;
     bool display_complete = false;
     std::vector<std::string> specified_tags;
     std::string specified_date;
     auto task_list = task->add_subcommand("list", tm_task::LIST_DESCRIPTION);
     task_list->add_option("--max,-m", max_tasks, tm_task::MAX_DESCRIPTION);
-    task_list->add_flag("--condensed,-c", condensed,
-            tm_task::CONDENSED_DESCRIPTION);
+    task_list->add_flag("--long,-l", list_long,
+            tm_task::LIST_LONG_DESCRIPTION);
     task_list->add_flag("--display-complete,-f", display_complete,
             tm_task::DISPLAY_DONE_DESCRIPTION);
     task_list->add_option("--date,-d", specified_date, 
@@ -113,7 +114,7 @@ int main(int argc, char **argv) {
     task_list->add_option("--tags,-t", specified_tags,
             tm_task::LIST_TAGS_DESCRIPTION);
     task_list->callback( [&]() {
-            tm_task::handle_list(condensed, max_tasks,
+            tm_task::handle_list(list_long, max_tasks,
                                  display_complete,
                                  specified_tags,
                                  specified_date);

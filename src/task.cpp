@@ -54,7 +54,7 @@ void tm_task::handle_add(const std::string &task_name,
                   << "' is not a valid time!" << std::endl;
         exit(1);
     }
-    std::string due;
+    std::string due = due_date + " " + due_time + ":00.000";
     tm_db::Task task = {task_name, proj_name, due, tags};
     auto db = tm_db::TMDatabase();
     db.add_task(task);
@@ -63,7 +63,7 @@ void tm_task::handle_add(const std::string &task_name,
 
 /**
  * Description: display a list of tasks, matching the criteria
- * @param[in] condensed: display all the tasks with a minimized output
+ * @param[in] list_long: display additional information about each task
  * @param[in] max_tasks: the maximum number of tasks to display
  * @param[in] display_done: if true will also display completed tags that
  * match the specified criteria
@@ -71,10 +71,10 @@ void tm_task::handle_add(const std::string &task_name,
  * @param[in] specified date: only display tags that are due on the
  * specified date
  */
-void tm_task::handle_list(bool condensed, int max_tasks, bool display_done,
+void tm_task::handle_list(bool list_long, int max_tasks, bool display_done,
                           const std::vector<std::string> &specified_tags,
                           const std::string &specified_date) {
     auto db = tm_db::TMDatabase();
-    db.list_tasks(condensed, max_tasks, display_done,
+    db.list_tasks(list_long, max_tasks, display_done,
                    specified_tags, specified_date);
 }

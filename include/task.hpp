@@ -35,8 +35,8 @@ namespace tm_task {
         "Display the current tasks used";
     const std::string MAX_DESCRIPTION =
         "The maximum number of tasks to be displayed, by default,\nthere is no max";
-    const std::string CONDENSED_DESCRIPTION =
-        "Only show the tasks without all their tags or due dates";
+    const std::string LIST_LONG_DESCRIPTION =
+        "Also display the tags of each task, and what project the task belongs to";
     const std::string DISPLAY_DONE_DESCRIPTION =
         "Display the completeted tasks along with the incomplete\nones";
     const std::string LIST_TAGS_DESCRIPTION =
@@ -74,7 +74,7 @@ namespace tm_task {
 
     /**
      * Description: display a list of tasks, matching the criteria
-     * @param[in] condensed: display all the tasks with a minimized output
+     * @param[in] list_long: display additional information about each task
      * @param[in] max_tasks: the maximum number of tasks to display
      * @param[in] display_done: if true will also display completed tasks that
      * match the specified criteria
@@ -82,7 +82,7 @@ namespace tm_task {
      * @param[in] specified date: only display tags that are due on the
      * specified date
      */
-    void handle_list(bool condensed, int max_tasks, bool display_done,
+    void handle_list(bool list_long, int max_tasks, bool display_done,
                      const std::vector<std::string> &specified_tags,
                      const std::string &specified_date);
 

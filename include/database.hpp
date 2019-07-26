@@ -128,6 +128,7 @@ namespace tm_db {
         void execute_query(const std::string &query,
                            const sqlite3_callback callback,
                            const std::string &err_message);
+
     public:
         /**
          * Description: Creates the dotfile directory for tm if it doesn't
@@ -182,7 +183,7 @@ namespace tm_db {
 
         /**
          * Description: display a list of tasks, matching the criteria
-         * @param[in] condensed: display all the tasks with a minimized output
+         * @param[in] list_long: display additional information about each task
          * @param[in] max_tasks: the maximum number of tasks to display
          * @param[in] display_done: if true will also display completed tags that
          * match the specified criteria
@@ -190,7 +191,7 @@ namespace tm_db {
          * @param[in] specified date: only display tags that are due on the
          * specified date
          */
-        void list_tasks(bool condensed, int max_tags, bool display_done,
+        void list_tasks(bool list_long, int max_tasks, bool display_done,
                         const std::vector<std::string> &specified_tags,
                         const std::string &specified_date);
 
