@@ -26,7 +26,11 @@ namespace tm_proj {
 
     const std::string DONE_DESCRIPTION = "Complete an existing proj";
 
+    const std::string REVERSED_DESCRIPTION =
+        "Sets the project to be incomplete if complete";
+
     const std::string LIST_DESCRIPTION = "List all the current projects";
+
 
     const std::string LONG_DESCRIPTION =
         "Display the tasks along with each project";
@@ -47,8 +51,9 @@ namespace tm_proj {
      * Description: Set the projects status to complete, if there are still
      * tasks that reference that project and are unfinished, raises error
      * @param[in] proj_name: The name of the project to complete
+     * @param[in] reversed: If true, the project will be set to incomplete status
      */
-    void handle_done(std::string proj_name);
+    void handle_done(std::string proj_name, bool reversed);
 
     /**
      * Description: adds a new project to the project table

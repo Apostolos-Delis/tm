@@ -69,12 +69,13 @@ void tm_task::handle_add(const std::string &task_name,
  * @param[in] display_done: if true will also display completed tags that
  * match the specified criteria
  * @param[in] specified tags: only display tags that have one of the tags
- * @param[in] specified date: only display tags that are due on the
- * specified date
+ * @param[in] specified date: only display tags that are due on the specified date
+ * @param[in] specified_proj: only display tags that are due in the specified project
  */
 void tm_task::handle_list(bool list_long, int max_tasks, bool display_done,
                           const std::vector<std::string> &specified_tags,
-                          const std::string &specified_date) {
+                          const std::string &specified_date,
+                          const std::string &specified_proj) {
     if (!specified_date.empty() && !tm_utils::valid_date(specified_date)) {
         std::cerr << "ERROR: '" << specified_date
                   << "' is not a valid date!" << std::endl;
@@ -82,5 +83,5 @@ void tm_task::handle_list(bool list_long, int max_tasks, bool display_done,
     }
     auto db = tm_db::TMDatabase();
     db.list_tasks(list_long, max_tasks, display_done,
-                   specified_tags, specified_date);
+                   specified_tags, specified_date, specified_proj);
 }

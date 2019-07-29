@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
     auto task_done = task->add_subcommand("done", tm_task::DONE_DESCRIPTION);
     task_done->add_option("--id,-i", task_id,
             tm_task::ID_DESCRIPTION)->required();
-    task_done->add_flag("--reversed,-r", reversed, 
+    task_done->add_flag("--reversed,-r", reversed,
             tm_task::REVERSED_DESCRIPTION);
     task_done->callback( [&]() {
             tm_task::handle_done(task_id, reversed);
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
     task_add->add_option("--time,-t", due_time, tm_task::TIME_DESCRIPTION);
     task_add->add_option("--tags,-l", tags, tm_task::TAGS_DESCRIPTION);
     task_add->callback( [&]() {
-            tm_task::handle_add(task_name, proj_name, due_date, 
+            tm_task::handle_add(task_name, proj_name, due_date,
                                 due_time, tags);
     });
 
@@ -105,22 +105,25 @@ int main(int argc, char **argv) {
     bool list_long = false;
     bool display_complete = false;
     std::vector<std::string> specified_tags;
-    std::string specified_date;
+    std::string specified_date, specified_proj;
     auto task_list = task->add_subcommand("list", tm_task::LIST_DESCRIPTION);
     task_list->add_option("--max,-m", max_tasks, tm_task::MAX_DESCRIPTION);
     task_list->add_flag("--long,-l", list_long,
             tm_task::LIST_LONG_DESCRIPTION);
-    task_list->add_flag("--display-complete,-f", display_complete,
+    task_list->add_flag("--complete,-c", display_complete,
             tm_task::DISPLAY_DONE_DESCRIPTION);
-    task_list->add_option("--date,-d", specified_date, 
+    task_list->add_option("--date,-d", specified_date,
             tm_task::LIST_DATE_DESCRIPTION);
+    task_list->add_option("--project,-p", specified_proj,
+            tm_task::LIST_PROJ_DESCRIPTION);
     task_list->add_option("--tags,-t", specified_tags,
             tm_task::LIST_TAGS_DESCRIPTION);
     task_list->callback( [&]() {
             tm_task::handle_list(list_long, max_tasks,
                                  display_complete,
                                  specified_tags,
-                                 specified_date);
+                                 specified_date,
+                                 specified_proj);
     });
 
     // Define tm tag
@@ -176,8 +179,10 @@ int main(int argc, char **argv) {
     auto proj_done = proj->add_subcommand("done", tm_proj::DONE_DESCRIPTION);
     proj_done->add_option("--name,-n", proj_name,
             tm_proj::NAME_DESCRIPTION)->required();
+    proj_done->add_flag("--reversed,-r", reversed,
+            tm_proj::REVERSED_DESCRIPTION);
     proj_done->callback( [&]() {
-            tm_proj::handle_done(proj_name);
+            tm_proj::handle_done(proj_name, reversed);
     });
 
     // Define proj add
@@ -194,7 +199,7 @@ int main(int argc, char **argv) {
     auto proj_list = proj->add_subcommand("list", tm_proj::LIST_DESCRIPTION);
     proj_list->add_flag("--long,-l", long_format,
             tm_proj::LONG_DESCRIPTION);
-    proj_list->add_flag("--display-complete,-f", display_complete,
+    proj_list->add_flag("--complete,-c", display_complete,
             tm_proj::DISPLAY_DONE_DESCRIPTION);
     proj_list->callback( [&]() {
             tm_proj::handle_list(long_format, display_complete, proj_names);

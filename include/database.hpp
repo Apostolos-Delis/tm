@@ -87,7 +87,7 @@ namespace tm_db {
          * The columns for the table are:
          *   id: this is an autoincremented int
          *   task: a string for the task to complete
-         *   due: a string containing the date as a string in the following format: 
+         *   due: a string containing the date as a string in the following format:
          *   YYYY-MM-DD HH:MM:SS.SSS
          *   complete: boolean for whether a certain task is complete
          */
@@ -187,13 +187,16 @@ namespace tm_db {
          * @param[in] max_tasks: the maximum number of tasks to display
          * @param[in] display_done: if true will also display completed tags that
          * match the specified criteria
-         * @param[in] specified tags: only display tags that have one of the tags
-         * @param[in] specified date: only display tags that are due on the
+         * @param[in] specified_tags: only display tags that have one of the tags
+         * @param[in] specified_date: only display tags that are due on the
          * specified date
+         * @param[in] specified_proj: only display tags that are due in the
+         * specified project
          */
         void list_tasks(bool list_long, int max_tasks, bool display_done,
                         const std::vector<std::string> &specified_tags,
-                        const std::string &specified_date);
+                        const std::string &specified_date,
+                        const std::string &specified_proj);
 
         // Sess related funcitons
         void sess_log(bool condensed, int max_sessions);
@@ -215,8 +218,9 @@ namespace tm_db {
          * Description: Set the projects status to complete, if there are still tasks that
          * reference that project and are unfinished, then this will fail
          * @param[in] proj_name: The name of the project to complete
+         * @param[in] val: val will be 1 if project is to be completed, 0 if incomplete
          */
-        void complete_project(std::string proj_name);
+        void complete_project(std::string proj_name, int val);
 
         /**
          * Description: adds a new project to the project table

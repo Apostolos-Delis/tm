@@ -57,6 +57,13 @@ namespace tm_utils {
      * @return Returns true if the date is valid, false otherwise
      */
     bool valid_time(std::string time_str);
+
+    /**
+     * Description: returns a string of the current date and time as a string of the with the
+     * following format:
+     * YYYY-MM-DD HH:MM
+     */
+    std::string current_datetime();
 }
 
 // class for defining colors

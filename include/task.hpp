@@ -62,6 +62,9 @@ namespace tm_task {
     const std::string LIST_DATE_DESCRIPTION =
         "Display only tasks that occur during that date";
 
+    const std::string LIST_PROJ_DESCRIPTION =
+        "Display only tasks that are part of the specified project";
+
     /**
      * Description: remove a task from the tasks table
      * @param[in] task_id: The id of the task to remove
@@ -100,10 +103,13 @@ namespace tm_task {
      * @param[in] specified tags: only display tags that have one of the tags
      * @param[in] specified date: only display tags that are due on the
      * specified date
+     * @param[in] specified_proj: only display tags that are due in the
+     * specified project
      */
     void handle_list(bool list_long, int max_tasks, bool display_done,
                      const std::vector<std::string> &specified_tags,
-                     const std::string &specified_date);
+                     const std::string &specified_date,
+                     const std::string &specified_proj);
 
 }
 

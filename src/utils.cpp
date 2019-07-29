@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdlib.h> 
+#include <ctime>
 #include <pwd.h>
 
 #include <string>
@@ -96,23 +97,31 @@ std::string tm_utils::home_dir() {
  * @return returns true if the date is valid
  */
 bool checkdate(int m, int d, int y) {
-  if (!(1 <= m && m <= 12))
-     return false;
-  if (!(1 <= d && d <= 31))
-     return false;
-  if ((d == 31) && (m == 2 || m == 4 || m == 6 || m == 9 || m == 11))
-     return false;
-  if ((d == 30) && (m == 2))
-     return false;
-  if ((m == 2) && (d == 29) && (y % 4 != 0))
-     return false;
-  if ((m == 2) && (d == 29) && (y % 400 == 0))
-     return true;
-  if ((m==2) && (d==29) && (y%100==0))
-     return false;
-  if ((m==2) && (d==29) && (y%4==0))
-     return true;
-  return true;
+    if (!(1 <= m && m <= 12)) {
+        return false;
+    }
+    if (!(1 <= d && d <= 31)) {
+        return false;
+    }
+    if ((d == 31) && (m == 2 || m == 4 || m == 6 || m == 9 || m == 11)) {
+        return false;
+    }
+    if ((d == 30) && (m == 2)) {
+        return false;
+    }
+    if ((m == 2) && (d == 29) && (y % 4 != 0)) {
+        return false;
+    }
+    if ((m == 2) && (d == 29) && (y % 400 == 0)) {
+        return true;
+    }
+    if ((m==2) && (d==29) && (y%100==0)) {
+        return false;
+    }
+    if ((m==2) && (d==29) && (y%4==0)) {
+        return true;
+    }
+    return true;
 }
 
 /**
@@ -173,4 +182,25 @@ bool tm_utils::valid_time(std::string time_str) {
         return false;
     }
     return true;
+}
+
+
+/**
+ * Description: returns a string of the current date and time as a string of the with the
+ * following format:
+ * YYYY-MM-DD HH:MM
+ * Reference: https://stackoverflow.com/questions/16357999/current-date-and-time-as-string
+ */
+std::string tm_utils::current_datetime() {
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer[30];
+
+    time (&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    strftime(buffer,sizeof(buffer),"%Y-%m-%d %H:%M",timeinfo);
+    std::string ret(buffer);
+
+    return ret;
 }
