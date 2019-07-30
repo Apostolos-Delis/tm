@@ -55,6 +55,14 @@ namespace tm_sess {
                       bool no_overtime, int task_id,
                       const std::string &description);
 
+
+    /**
+     * Description: Displays a log of all the recent sessions
+     * @param[in] condensed: If condensed, the log only shows the time and duration of the log,
+     * as well as the task_id, otherwise, the log is similar in style to 'git log'
+     * @param[in] max_sessions: The max number of sessions to display, default is defined by
+     * DEFAULT_LOG_LENGTH
+     */
     void handle_log(bool condensed, int max_sessions);
 
 }

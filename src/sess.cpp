@@ -127,7 +127,7 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
     // Initialize the progress bar with zeros
     print_bar(0.0, BAR_WIDTH);
     std::cout << "% Time Left: "
-              << tm_utils::sec_to_time(temp_seconds) << " \r";
+              << tm_utils::sec_to_time(temp_seconds) << " (H:MM:SS)\r";
     std::cout.flush();
 
     double increment = static_cast<double>(1.0 / (sess_length * 60));
@@ -180,7 +180,14 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
 }
 
 
-// Display a log of the most recent sessions
+/**
+ * Description: Displays a log of all the recent sessions
+ * @param[in] condensed: If condensed, the log only shows the time and duration of the log,
+ * as well as the task_id, otherwise, the log is similar in style to 'git log'
+ * @param[in] max_sessions: The max number of sessions to display, default is defined by
+ * DEFAULT_LOG_LENGTH
+ */
 void tm_sess::handle_log(bool condensed, int max_sessions) {
-
+    auto db = tm_db::TMDatabase();
+    db.sess_log(condensed, max_sessions);
 }

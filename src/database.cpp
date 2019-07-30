@@ -331,7 +331,7 @@ void tm_db::TMDatabase::remove_tag(const std::string &tag, bool hard) {
  * Description: callback functions for list_tags, look at sqlite3 documentation
  * for more information about the different params
  */
-static int _color_list_tags(void* data, int argc, char** argv, char** cols) {
+static int color_list_tags(void* data, int argc, char** argv, char** cols) {
     size_t tag_len = strlen(argv[0]);
     std::string spaces((SPACE_WIDTH - tag_len), ' ');
 
@@ -347,7 +347,7 @@ static int _color_list_tags(void* data, int argc, char** argv, char** cols) {
 /**
  * Same as above function, but this one supports the no_color option
  */
-static int _nocolor_list_tags(void* data, int argc, char** argv, char** cols) {
+static int nocolor_list_tags(void* data, int argc, char** argv, char** cols) {
     size_t tag_len = strlen(argv[0]);
     std::string spaces((SPACE_WIDTH - tag_len), ' ');
     std::cout << argv[0] <<  spaces << argv[1] << std::endl;
@@ -384,9 +384,9 @@ void tm_db::TMDatabase::list_tags(bool no_color, int max_tags) {
     // Select the correct callback
     sqlite3_callback callback;
     if (no_color) {
-        callback = _nocolor_list_tags;
+        callback = nocolor_list_tags;
     } else {
-        callback = _color_list_tags;
+        callback = color_list_tags;
     }
     this->execute_query(sql, callback, "SQL error querying tags");
 }
@@ -705,8 +705,45 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
 }
 
 
+/**
+ * Description: Callback function for printing the sessions
+ */
+static int list_sess_long(void* data, int argc, char** argv, char** cols) {
+    std::cout << "Session Number: " << argv[0] << std::endl;
+    std::cout << "Task to Complete: '" << argv[1] << "'" << std::endl;
+    std::string date_time(argv[2]);
+    std::cout << "Time and Date: " << date_time.substr(0, 16) << std::endl;
+    std::cout << "Duration: " << tm_utils::sec_to_time(atoi(argv[3]))
+              << " (H:MM:SS)" << std::endl;
+    std::cout << "\n\t" << argv[4] << std::endl;
+    std::cout << std::endl;
+    return 0;
+}
+
+
 void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
-    // TODO (25/07/2019): Finish sess log
+    this->create_sess_table();
+    std::stringstream ss;
+    ss << "SELECT sess.id, tasks.task, sess.time_started, sess.length, sess.desc\n"
+       << "FROM sess INNER JOIN tasks ON tasks.id = sess.task_id\n"
+       << "ORDER BY sess.time_started DESC\n";
+
+    if (max_sessions > 0) {
+       ss << "LIMIT " << max_sessions;
+    } else if (max_sessions < 0) {
+        std::cerr << "ERROR: the -m option must recieve a positive number!"
+                  << std::endl;
+        exit(1);
+    }
+
+    sqlite3_callback callback;
+    if (condensed) {
+        callback = NULL;
+    } else {
+        // TODO (30/07/2019): Pipe this to the bash command less
+        callback = list_sess_long;
+    }
+    this->execute_query(ss.str(), callback, "SQL ERROR Querying sessions");
 }
 
 
