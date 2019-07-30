@@ -101,15 +101,18 @@ int main(int argc, char **argv) {
     });
 
     // Define task list
-    int max_tasks;
+    int max_tasks = 50;
     bool list_long = false;
     bool display_complete = false;
+    bool display_all = false;
     std::vector<std::string> specified_tags;
     std::string specified_date, specified_proj;
     auto task_list = task->add_subcommand("list", tm_task::LIST_DESCRIPTION);
     task_list->add_option("--max,-m", max_tasks, tm_task::MAX_DESCRIPTION);
     task_list->add_flag("--long,-l", list_long,
             tm_task::LIST_LONG_DESCRIPTION);
+    task_list->add_flag("--all,-a", display_all,
+            tm_task::DISPLAY_ALL_DESCRIPTION);
     task_list->add_flag("--complete,-c", display_complete,
             tm_task::DISPLAY_DONE_DESCRIPTION);
     task_list->add_option("--date,-d", specified_date,
@@ -119,6 +122,9 @@ int main(int argc, char **argv) {
     task_list->add_option("--tags,-t", specified_tags,
             tm_task::LIST_TAGS_DESCRIPTION);
     task_list->callback( [&]() {
+            if (display_all) {
+                max_tasks = 0;
+            }
             tm_task::handle_list(list_long, max_tasks,
                                  display_complete,
                                  specified_tags,

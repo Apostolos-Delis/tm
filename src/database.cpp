@@ -424,6 +424,15 @@ void tm_db::TMDatabase::add_task(const Task &task) {
             std::cerr << "Invalid project: " << task.proj_name << std::endl;
             exit(1);
         }
+        // Check to make sure that the proj_id is not for a completed project
+        std::stringstream ss_check;
+        ss_check << "(SELECT 1 FROM projects WHERE complete = 0 AND id = " << proj_id << ")";
+        if (this->num_rows(ss_check.str()) == 0) {
+            std::cerr << "ERROR: '" << task.proj_name << "' is competed!" << std::endl;
+            std::cerr << "Run 'tm proj done -r -n " << task.proj_name
+                      << "' to set the project to be still in progress" << std::endl;
+            exit(1);
+        }
         ss << "INSERT INTO tasks (task, due, proj_id)\nVALUES('"
            << task.name << "', '" << task.due << "', "
            << proj_id << ") ";
@@ -710,11 +719,37 @@ void tm_db::TMDatabase::remove_project(std::string proj_name, bool hard) {
 void tm_db::TMDatabase::complete_project(std::string proj_name, int val) {
     this->create_proj_table();
     int proj_id = this->proj_id(proj_name);
-    std::stringstream ss;
-    ss << "UPDATE projects\nSET complete = " << val << "\nWHERE id = "
-       << proj_id << ";";
-    std::string sql(ss.str());
-    this->execute_query(sql, NULL, "SQL error updating projects table");
+    if (proj_id == -1) {
+        std::cerr << "ERROR: '" << proj_id << "' is not a valid project"
+                  << std::endl;
+        exit(1);
+    }
+
+    std::stringstream ss_num;
+    // Check to see if all the tasks related to this project are complete
+    ss_num << "(SELECT * FROM tasks WHERE complete = 0 AND proj_id = "
+           << proj_id << ")";
+
+    int num_tasks = this->num_rows(ss_num.str());
+    if (num_tasks == 0) {
+        std::stringstream ss;
+        ss << "UPDATE projects\nSET complete = " << val << "\nWHERE id = "
+           << proj_id << ";";
+        std::string sql(ss.str());
+        this->execute_query(sql, NULL, "SQL error updating projects table");
+    } else {
+        std::cerr << "ERROR: '" << proj_name
+                  << "' cannot be completed because there ";
+        if (num_tasks == 1) {
+            std::cerr << "is 1 task that is";
+        } else {
+            std::cerr << "are " << num_tasks << " tasks that are";
+        }
+        std::cerr << " incomplete for this project." << std::endl;
+        std::cerr << "Run 'tm task list -p " << proj_name
+                  << "' to see the tasks remaining to be completed."
+                  << std::endl;
+    }
 }
 
 
@@ -808,7 +843,6 @@ int static list_projects_callback_long(void* data, int argc,
             sqlite3_free(err);
             exit(1);
         }
-        std::cout << std::endl;
     } else {
         std::cout << "\tAll tasks completed at this time." << std::endl;
     }

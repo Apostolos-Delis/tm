@@ -48,13 +48,17 @@ namespace tm_task {
         "Display the current tasks used";
 
     const std::string MAX_DESCRIPTION =
-        "The maximum number of tasks to be displayed, by default,\nthere is no max";
+        "The maximum number of tasks to be displayed, by default,\nthe max is 50";
 
     const std::string LIST_LONG_DESCRIPTION =
         "Also display the tags of each task, and what project the task belongs to";
 
     const std::string DISPLAY_DONE_DESCRIPTION =
         "Display the completeted tasks along with the incomplete\nones";
+
+    const std::string DISPLAY_ALL_DESCRIPTION =
+        "Effectively the same as removing the max restriction\n"
+        "if -a and -m N options are selected, then -a will overwite -m";
 
     const std::string LIST_TAGS_DESCRIPTION =
         "Display only tasks that have a tag that matches one\nof the tags in the specified list";
