@@ -189,8 +189,10 @@ namespace tm_db {
         /**
          * Description: remove a task from the tasks table
          * @param[in] task_id: The id of the task to remove
+         * @param[in] hard: Remove the task even if it is referenced by other
+         * sessions
          */
-        void remove_task(int task_id);
+        void remove_task(int task_id, bool hard);
 
         /**
          * Description: adds a new task to the tasks table

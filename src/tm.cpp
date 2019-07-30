@@ -69,11 +69,13 @@ int main(int argc, char **argv) {
     task->require_subcommand(1);
 
     // Define task rm
+    bool hard_remove = false;
     auto task_rm = task->add_subcommand("rm", tm_task::RM_DESCRIPTION);
     task_rm->add_option("--id,-i", task_id,
             tm_task::ID_DESCRIPTION)->required();
+    task_rm->add_flag("--hard", hard_remove, tm_task::HARD_RM_DESCRIPTION);
     task_rm->callback( [&]() {
-            tm_task::handle_rm(task_id);
+            tm_task::handle_rm(task_id, hard_remove);
     });
     // Define task done
     bool reversed;
@@ -143,7 +145,6 @@ int main(int argc, char **argv) {
     std::string tag_name;
 
     // Define tag rm
-    bool hard_remove = false;
     auto tag_rm = tag->add_subcommand("rm", tm_tag::RM_DESCRIPTION);
     tag_rm->add_flag("--hard", hard_remove, tm_tag::HARD_RM_DESCRIPTION);
     tag_rm->add_option("--name,-n", tag_name,

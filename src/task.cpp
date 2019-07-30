@@ -14,10 +14,12 @@
 /**
  * Description: remove a task from the tasks table
  * @param[in] task_name: The name of the task to remove
+ * @param[in] hard: Remove the task even if it is referenced by other
+ * sessions
  */
-void tm_task::handle_rm(int task_id) {
+void tm_task::handle_rm(int task_id, bool hard) {
     auto db = tm_db::TMDatabase();
-    db.remove_task(task_id);
+    db.remove_task(task_id, hard);
 }
 
 

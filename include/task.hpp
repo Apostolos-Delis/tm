@@ -30,6 +30,9 @@ namespace tm_task {
 
     const std::string RM_DESCRIPTION = "Remove an existing task";
 
+    const std::string HARD_RM_DESCRIPTION =
+        "Removes the task even if it is referenced by other sessions";
+
     const std::string DONE_DESCRIPTION = "Complete an existing task";
 
     const std::string REVERSED_DESCRIPTION =
@@ -72,9 +75,10 @@ namespace tm_task {
     /**
      * Description: remove a task from the tasks table
      * @param[in] task_id: The id of the task to remove
-     * @return Returns
+     * @param[in] hard: Remove the task even if it is referenced by other
+     * sessions
      */
-    void handle_rm(int task_id);
+    void handle_rm(int task_id, bool hard);
 
     /**
      * Description: Update a task to complete in the tasks table

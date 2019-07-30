@@ -425,15 +425,44 @@ void tm_db::TMDatabase::complete_task(int task_id, int val) {
 /**
  * Description: remove a task from the tasks table
  * @param[in] task_id: The id of the task to remove
+ * @param[in] hard: Remove the task even if it is referenced by other
+ * sessions
  */
-void tm_db::TMDatabase::remove_task(int task_id) {
-    // TODO (30/07/2019): Add --hard option for when the task_id is
-    // referenced by all the sessions
+void tm_db::TMDatabase::remove_task(int task_id, bool hard) {
     this->create_task_table();
-    std::stringstream ss;
-    ss << "DELETE FROM tasks WHERE id = " << task_id << ";";
-    std::string sql(ss.str());
-    this->execute_query(sql, NULL, "SQL error removing task from task table");
+
+    // Returns the total number of times that the tag is used by creating a
+    // subquery and treating it as a table
+    std::stringstream ref_ss;
+    ref_ss << "(SELECT id FROM sess WHERE task_id = " << task_id << ")";
+    int num_referenced = this->num_rows(ref_ss.str());
+
+    if (hard || num_referenced == 0) {
+        // This removal method does not check to see if other tags exist
+        std::stringstream ss1, ss2;
+
+        ss1 << "DELETE FROM tasks WHERE id = " << task_id << ";";
+        this->execute_query(ss1.str(), NULL,
+                "SQL error removing task from tasks table");
+
+        // If any sessions reference this task_id, their task_id is set to null
+        if (num_referenced != 0) {
+            ss2 << "UPDATE sess\nSET task_id = NULL\nWHERE id = " << task_id;
+            this->execute_query(ss2.str(), NULL, "SQL error updating session");
+        }
+    } else {
+        std::cerr << "ERROR: Cannot remove task with id: '" << task_id
+                  << "' because it is currently referenced by "
+                  << num_referenced;
+        if (num_referenced > 1) {
+            std::cerr << " sessions."<< std::endl;
+        } else {
+            std::cerr << " session."<< std::endl;
+        }
+        std::cerr << "If you really want to remove this task, run: "
+                  << "'tm task rm -i " << task_id << " --hard'" << std::endl;
+        exit(1);
+    }
 }
 
 
@@ -501,9 +530,12 @@ int static list_tasks_callback(void* data, int argc,
     std::string spaces3(5, ' ');
 
     std::string completed;
+    // If task is complete
     if (atoi(argv[1])) {
+        // Green Checkmark
         completed = "\033[32m✔\033[0m";
     } else {
+        // Red X
         completed = "\033[31m✖\033[0m";
     }
 
@@ -512,7 +544,14 @@ int static list_tasks_callback(void* data, int argc,
 
     std::cout << argv[0] << spaces1 << completed << spaces2;
     if (date < tm_utils::current_datetime()) {
-        std::cout << "\033[91m" << date << tm_color::NOCOLOR << spaces3;
+        // If complete, print date as red, else print it as green
+        if (atoi(argv[1])) {
+            std::cout << "\033[92m";
+        }
+        else {
+            std::cout << "\033[91m";
+        }
+        std::cout << date << tm_color::NOCOLOR << spaces3;
     } else {
         std::cout << date << spaces3;
     }
@@ -740,7 +779,10 @@ static int list_sess_long(void* data, int argc, char** argv, char** cols) {
     std::cout << "Time and Date: " << date_time.substr(0, 16) << std::endl;
     std::cout << "Duration: " << tm_utils::sec_to_time(atoi(argv[3]))
               << " (H:MM:SS)" << std::endl;
-    std::cout << "\n\t" << argv[4] << std::endl;
+    // description could also be null
+    if (argv[4]) {
+        std::cout << "\n\t" << argv[4] << std::endl;
+    }
     std::cout << std::endl;
     return 0;
 }
