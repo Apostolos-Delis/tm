@@ -20,7 +20,7 @@ namespace tm_sess {
         "The designated task to be worked on during the session";
 
     const std::string LENGTH_DESCRIPTION =
-        "The length of the session (in min)";
+        "The length of the session (in min), maximum is 3 hours (180 min)";
 
     const std::string INTERRUPT_DESCRIPTION =
         "Do not allow the session to be terminated (with ^C)";

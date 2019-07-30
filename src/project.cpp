@@ -9,6 +9,8 @@
 #include "project.hpp"
 #include "database.hpp"
 
+#define MAX_PROJ_LENGTH 64
+
 
 /**
  * Description: remove a project from the projects table
@@ -22,6 +24,7 @@ void tm_proj::handle_rm(std::string proj_name, bool hard) {
     db.remove_project(proj_name, hard);
 }
 
+
 /**
  * Description: Set the projects status to complete, if there are still tasks that
  * reference that project and are unfinished, then this will fail
@@ -33,19 +36,21 @@ void tm_proj::handle_done(std::string proj_name, bool reversed) {
     db.complete_project(proj_name, reversed ? 0 : 1);
 }
 
+
 /**
  * Description: adds a new project to the project table
  * @param[in] proj_name: the name of the project to be added
  */
 void tm_proj::handle_add(const std::string &proj_name) {
     auto db = tm_db::TMDatabase();
-    if (proj_name.length() > 64) {
+    if (proj_name.length() > MAX_PROJ_LENGTH) {
         std::cerr << "ERROR: '" << proj_name << "' is too long." << std::endl;
         std::cerr << "Please keep project names under 64 chars." << std::endl;
         exit(1);
     }
     db.add_project(proj_name);
 }
+
 
 /**
  * Description: display a list of projects, matching the criteria
@@ -61,4 +66,3 @@ void tm_proj::handle_list(bool show_tasks, bool display_done,
     auto db = tm_db::TMDatabase();
     db.list_projects(show_tasks, display_done, proj_names);
 }
-

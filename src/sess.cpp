@@ -22,6 +22,8 @@
 
 // The length of the progress bar
 #define BAR_WIDTH 70
+// Maximum session length is 3 hours
+#define MAX_SESS_LENGTH 3 * 60
 
 // Global variables relating to the session, allows for access within
 // functions
@@ -58,11 +60,15 @@ void handle_signal(int sig) {
     if (!nointerrupt) {
         // This newline makes sure that the progress bar prints correctly
         std::cout << std::endl;
-        auto db = tm_db::TMDatabase();
-        db.add_sess(start, len, sess_task_id, sess_desc);
+
+        // Exclude sessions less than 60 seconds from the database
+        if (len > 60) {
+            auto db = tm_db::TMDatabase();
+            db.add_sess(start, len, sess_task_id, sess_desc);
+        }
         exit(0);
     } else {
-        std::cerr << "\n-o option has been selected, cannot exit, till time"
+        std::cerr << "\n-i option has been selected, cannot exit until time"
                   << " is up" << std::endl;
     }
 }
@@ -83,6 +89,20 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
     // Set the global variable to the current start time
     start = tm_utils::current_datetime() + ":00.000";
 
+    if (sess_length <= 0) {
+        std::cerr << "ERROR: '" << sess_length << "' is an invalid sess length"
+                  << std::endl;
+        std::cerr << "The length of the sess must be a positive integer from 1-180"
+                  << std::endl;
+    }
+
+    if (sess_length > MAX_SESS_LENGTH * 60) {
+        std::cerr << "Session exceeds maximum limit" << std::endl;
+        std::cerr << "Capping session time to " << MAX_SESS_LENGTH
+                  << " minutes." <<  std::endl;
+        sess_length = MAX_SESS_LENGTH;
+    }
+
     // Assert that the id belongs to an incomplete existing task
     auto db = tm_db::TMDatabase();
     if (!db.valid_task_id(task_id)) {
@@ -98,7 +118,8 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
     sess_desc = description;
 
     double progress = 0.0;
-    int temp_seconds = sess_length;
+    // multiply by 60 since sess_length is in seconds
+    int temp_seconds = sess_length * 60;
 
     // Initialize mechanism to catch signal
     signal(SIGINT, handle_signal);
@@ -109,7 +130,7 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
               << tm_utils::sec_to_time(temp_seconds) << " \r";
     std::cout.flush();
 
-    double increment = static_cast<double>(1.0 / sess_length);
+    double increment = static_cast<double>(1.0 / (sess_length * 60));
     while (progress <= 1.0 && temp_seconds) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -153,7 +174,7 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
         std::cout.flush();
     }
     std::cout << std::endl;
-    std::cout << "Overtime limit reached, session closed with a duration " 
+    std::cout << "Overtime limit reached, session closed with a duration "
               << "of: " << tm_utils::sec_to_time(len) << std::endl;
     db.add_sess(start, len, sess_task_id, sess_desc);
 }
