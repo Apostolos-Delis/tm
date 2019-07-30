@@ -122,7 +122,7 @@ int tm_db::TMDatabase::tag_id(const std::string &tag) {
     int tag_id = -1;
     int rc;
     // On paper, this should only loop once since tag names should be unique
-    while ( (rc = sqlite3_step(sql)) == SQLITE_ROW) {                                              /* 2 */
+    while ((rc = sqlite3_step(sql)) == SQLITE_ROW) {
         tag_id = sqlite3_column_int(sql, 0);
     }
     return tag_id;
@@ -228,8 +228,8 @@ void tm_db::TMDatabase::create_sess_table() {
             "\tid                INTEGER PRIMARY KEY NOT NULL,\n"
             "\ttask_id           VARCHAR(128),\n"
             "\ttime_started      TEXT,\n"
-            "\tcomplete          INTEGER DEFAULT 0 NOT NULL,\n"
-            "\tdesc              TEXT,\n"
+            "\tlength            INTEGER NOT NULL,\n"
+            "\tdesc              TEXT DEFAULT NULL,\n"
             "FOREIGN KEY (task_id) REFERENCES tasks(id)\n"
             ");";
     std::string err_message = "SQL error creating sess table";
@@ -389,6 +389,19 @@ void tm_db::TMDatabase::list_tags(bool no_color, int max_tags) {
         callback = _color_list_tags;
     }
     this->execute_query(sql, callback, "SQL error querying tags");
+}
+
+
+/**
+ * Description: Check to see if the task_id corresponds to a valid incomplete
+ * task in the tasks table
+ * @param[in] task_id: the task id to be checkede
+ * @return Returns true if the task_id is valid and the task isn't completed
+ */
+bool tm_db::TMDatabase::valid_task_id(int task_id) {
+    std::stringstream ss;
+    ss << "(SELECT id FROM tasks WHERE complete = 0 AND id = " << task_id << ")";
+    return this->num_rows(ss.str()) == 1;
 }
 
 
@@ -655,8 +668,12 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
         ss << ")\n";
         ss << "GROUP BY task_id\n";
     }
+    if (display_done) {
+        ss << "ORDER BY due DESC\n";
+    } else {
+        ss << "ORDER BY due ASC\n";
+    }
 
-    ss << "ORDER BY due DESC\n";
 
     if (max_tasks > 0) {
         ss << " LIMIT " << max_tasks;
@@ -693,11 +710,32 @@ void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
 }
 
 
+/**
+ * Description: Inserts a session into the sess table
+ * @param[in] start: the start date of the session in proper ISO format
+ * @param[in] sess_length: the time in seconds of the sess duration
+ * @param[in] task_id: the task_id of the task that was worked on in the sess
+ * @param[in] description: a brief description of the sess
+ */
 void tm_db::TMDatabase::add_sess(const std::string &start,
                                  int sess_length,
-                                 const std::string &task,
+                                 int &task_id,
                                  const std::string &description) {
-        // TODO (25/07/2019): Finish add_sess
+    this->create_sess_table();
+    std::stringstream ss;
+    if (!description.empty()) {
+        ss << "INSERT INTO sess (task_id, time_started, desc, length)\nVALUES("
+           << task_id << ", '" << start << "', '" << description << "', "
+           << sess_length << ")";
+    }
+
+    else {
+        ss << "INSERT INTO sess (task_id, time_started, length)\nVALUES("
+           << task_id << ", '" << start << "', "
+           << sess_length << ")";
+    }
+    std::string sql(ss.str());
+    this->execute_query(sql, NULL, "SQL error inserting sess into table");
 }
 
 
@@ -832,10 +870,8 @@ int static list_projects_callback_long(void* data, int argc,
         << argv[2] << "\nORDER BY due DESC\nLIMIT 5";
 
     int num_rows = -1;
-
     std::stringstream ss;
     ss << "SELECT COUNT(*) FROM (" << ss1.str() << ")";
-
     char* err_message;
     int rc = sqlite3_exec(db, ss.str().c_str(),
                           count_callback, &num_rows, &err_message);

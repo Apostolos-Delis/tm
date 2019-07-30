@@ -13,6 +13,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 
 
  // for windows mkdir
@@ -203,4 +204,26 @@ std::string tm_utils::current_datetime() {
     std::string ret(buffer);
 
     return ret;
+}
+
+
+/**
+ * Description: creates a string out of the number of seconds 
+ * @param[in] num_seconds: the number of seconds to convert
+ * @return returns a string of the form H:MM:SS
+ */
+std::string tm_utils::sec_to_time(int num_seconds) {
+    int num_hours = num_seconds / 3600;
+    if (num_hours) {
+        num_seconds %= (num_hours * 3600);
+    }
+    int num_min = num_seconds / 60;
+    if (num_min) {
+        num_seconds %= (num_min * 60);
+    }
+    std::stringstream ss;
+    ss << num_hours << ":" << std::setw(2) << std::setfill('0')
+       << num_min << ":" << std::setw(2) << std::setfill('0')
+       << num_seconds;
+    return ss.str();
 }

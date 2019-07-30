@@ -163,6 +163,14 @@ namespace tm_db {
         void remove_tag(const std::string &tag, bool hard);
 
         /**
+         * Description: Check to see if the task_id corresponds to a valid incomplete
+         * task in the tasks table
+         * @param[in] task_id: the task id to be checkede
+         * @return Returns true if the task_id is valid and the task isn't completed
+         */
+        bool valid_task_id(int task_id);
+
+        /**
          * Display the tags
          * @param[in] no_color: will not use color codes to print tags, useful if
          * the output of this is redirected to a file
@@ -209,10 +217,16 @@ namespace tm_db {
 
         // Sess related funcitons
         void sess_log(bool condensed, int max_sessions);
-        void add_sess(const std::string &start,
-                      int sess_length,
-                      const std::string &task,
-                      const std::string &description);
+
+        /**
+         * Description: Inserts a session into the sess table
+         * @param[in] start: the start date of the session in proper ISO format
+         * @param[in] sess_length: the time in seconds of the sess duration
+         * @param[in] task_id: the task_id of the task that was worked on in the sess
+         * @param[in] description: a brief description of the sess
+         */
+        void add_sess(const std::string &start, int sess_length,
+                      int &task_id, const std::string &description);
 
         /**
          * Description: remove a project from the projects table

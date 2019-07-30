@@ -64,6 +64,13 @@ namespace tm_utils {
      * YYYY-MM-DD HH:MM
      */
     std::string current_datetime();
+
+    /**
+     * Description: creates a string out of the number of seconds 
+     * @param[in] num_seconds: the number of seconds to convert
+     * @return returns a string of the form HH:MM:SS
+     */
+    std::string sec_to_time(int num_seconds);
 }
 
 // class for defining colors

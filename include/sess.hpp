@@ -42,9 +42,19 @@ namespace tm_sess {
         "Display a minimal log of all the sessions";
 
     // functions for handling the different session subcommands
-    void handle_start(int sess_length, bool no_interrupt, bool no_overtime,
-                      const std::string &task,
+    /**
+     * Description: starts a session
+     * @param[in] sess_length: the amount of time, in min for a session
+     * @param[in] no_interrupt: prevents the session from terminating with ^C
+     * @param[in] no_overtime: if true, the session ends immediately after the
+     * time is over, otherwise it continues for up to 50% more time
+     * @param[in] task_id: the task id of the task being worked on
+     * @param[in] description: A quick description of the session's goals
+     */
+    void handle_start(int sess_length, bool no_interrupt,
+                      bool no_overtime, int task_id,
                       const std::string &description);
+
     void handle_log(bool condensed, int max_sessions);
 
 }

@@ -28,6 +28,14 @@ void tm_task::handle_rm(int task_id) {
  */
 void tm_task::handle_done(int task_id, bool reversed) {
     auto db = tm_db::TMDatabase();
+    if (!db.valid_task_id(task_id) && !reversed) {
+        std::cerr << "'" << task_id 
+                  << "' is not an id for any current incomplete task." 
+                  << std::endl;
+        std::cerr << "It is possible the task is already complete." << std::endl;
+        std::cerr << "To check, run 'tm task list -c'" << std::endl;
+        exit(1);
+    }
     db.complete_task(task_id, reversed ? 0 : 1);
 }
 
@@ -56,6 +64,7 @@ void tm_task::handle_add(const std::string &task_name,
         exit(1);
     }
     std::string due = due_date + " " + due_time + ":00.000";
+
     tm_db::Task task = {task_name, proj_name, due, tags};
     auto db = tm_db::TMDatabase();
     db.add_task(task);

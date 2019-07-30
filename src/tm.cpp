@@ -21,15 +21,15 @@ int main(int argc, char **argv) {
     session->require_subcommand(1);
 
     // Define sess start
-    std::string sess_task;
     std::string sess_desc = "";
+    int task_id;
     int sess_length;
     bool no_interupt = false;
     bool no_overtime = false;
     auto session_start = session->add_subcommand("start",
             tm_sess::START_DESCRIPTION);
     session_start->add_option("--task,-t",
-            sess_task, tm_sess::TASK_DESCRIPTION)->required();
+            task_id, tm_sess::TASK_DESCRIPTION)->required();
     session_start->add_option("--length,-l",
             sess_length, tm_sess::LENGTH_DESCRIPTION)->required();
     session_start->add_flag("--no-interrupt,-i",
@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
             sess_desc, tm_sess::DESC_DESCRIPTION);
     session_start->callback( [&]() {
             tm_sess::handle_start(sess_length, no_interupt, no_overtime,
-                                  sess_task, sess_desc);
+                                  task_id, sess_desc);
     });
 
     // Define sess log
@@ -63,7 +63,6 @@ int main(int argc, char **argv) {
     task->require_subcommand(1);
 
     // Define task rm
-    int task_id;
     auto task_rm = task->add_subcommand("rm", tm_task::RM_DESCRIPTION);
     task_rm->add_option("--id,-i", task_id,
             tm_task::ID_DESCRIPTION)->required();
