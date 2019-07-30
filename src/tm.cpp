@@ -46,15 +46,21 @@ int main(int argc, char **argv) {
     // Define sess log
     int max_sessions = DEFAULT_LOG_LENGTH;
     bool condensed = false;
+    bool sess_log_all = false;
     auto session_log = session->add_subcommand("log",
             tm_sess::LOG_DESCRIPTION);
     session_log->add_option("--max,-m", max_sessions,
             tm_sess::MAX_DESCRIPTION, true);
+    session_log->add_flag("--all,-a", sess_log_all,
+            tm_sess::ALL_DESCRIPTION);
     session_log->add_flag("--condensed,-c", condensed,
             tm_sess::CONDENSED_DESCRIPTION);
 
     void handle_log(bool condensed, int max_sessions);
     session_log->callback( [&]() {
+            if (sess_log_all) {
+                max_sessions = 0;
+            }
             tm_sess::handle_log(condensed, max_sessions);
     });
 

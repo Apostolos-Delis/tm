@@ -427,6 +427,8 @@ void tm_db::TMDatabase::complete_task(int task_id, int val) {
  * @param[in] task_id: The id of the task to remove
  */
 void tm_db::TMDatabase::remove_task(int task_id) {
+    // TODO (30/07/2019): Add --hard option for when the task_id is
+    // referenced by all the sessions
     this->create_task_table();
     std::stringstream ss;
     ss << "DELETE FROM tasks WHERE id = " << task_id << ";";
@@ -706,11 +708,34 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
 
 
 /**
+ * Description: Callback function for printing the sessions with --condensed
+ */
+static int list_sess(void* data, int argc, char** argv, char** cols) {
+    std::string task_id;
+    if (argv[1]) {
+        task_id = argv[1];
+    } else {
+        task_id = "N/A";
+    }
+    std::string spaces((7 - strlen(argv[0])), ' ');
+    std::string spaces1((7 - strlen(argv[1])), ' ');
+
+    std::cout << argv[0] << spaces << argv[1] << spaces1
+              << tm_utils::sec_to_time(atoi(argv[2])) << " (H:MM:SS)  "
+              << argv[3] << std::endl;
+    return 0;
+}
+
+/**
  * Description: Callback function for printing the sessions
  */
 static int list_sess_long(void* data, int argc, char** argv, char** cols) {
-    std::cout << "Session Number: " << argv[0] << std::endl;
-    std::cout << "Task to Complete: '" << argv[1] << "'" << std::endl;
+    std::cout << "\033[1;49;39mSession Number: " << argv[0] << std::endl;
+    std::cout << tm_color::NOCOLOR;
+    // task_id could be NULL
+    if (argv[1]) {
+        std::cout << "Task to Complete: '" << argv[1] << "'" << std::endl;
+    }
     std::string date_time(argv[2]);
     std::cout << "Time and Date: " << date_time.substr(0, 16) << std::endl;
     std::cout << "Duration: " << tm_utils::sec_to_time(atoi(argv[3]))
@@ -723,10 +748,28 @@ static int list_sess_long(void* data, int argc, char** argv, char** cols) {
 
 void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
     this->create_sess_table();
+
     std::stringstream ss;
-    ss << "SELECT sess.id, tasks.task, sess.time_started, sess.length, sess.desc\n"
-       << "FROM sess INNER JOIN tasks ON tasks.id = sess.task_id\n"
-       << "ORDER BY sess.time_started DESC\n";
+    sqlite3_callback callback;
+    if (condensed) {
+        ss << "SELECT id, task_id, length, date(time_started)\n"
+           << "FROM sess\n";
+        callback = list_sess;
+
+        // Print top of the table
+        if (this->num_rows("(" + ss.str() + ")") > 0) {
+            std::string spaces(13, ' ');
+            std::cout << "\033[1;4;49;39mID  Task ID   Length"
+                      << spaces << "Date\033[0m" << std::endl;
+        }
+    } else {
+        ss << "SELECT sess.id, tasks.task, sess.time_started, sess.length, "
+           << "sess.desc\n"
+           << "FROM sess LEFT JOIN tasks ON tasks.id = sess.task_id\n";
+        // TODO (30/07/2019): Pipe this to the bash command less
+        callback = list_sess_long;
+    }
+    ss << "ORDER BY sess.time_started DESC\n";
 
     if (max_sessions > 0) {
        ss << "LIMIT " << max_sessions;
@@ -734,14 +777,6 @@ void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
         std::cerr << "ERROR: the -m option must recieve a positive number!"
                   << std::endl;
         exit(1);
-    }
-
-    sqlite3_callback callback;
-    if (condensed) {
-        callback = NULL;
-    } else {
-        // TODO (30/07/2019): Pipe this to the bash command less
-        callback = list_sess_long;
     }
     this->execute_query(ss.str(), callback, "SQL ERROR Querying sessions");
 }

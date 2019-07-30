@@ -35,6 +35,10 @@ namespace tm_sess {
     const std::string LOG_DESCRIPTION =
         "Display a list of sessions, with a max limit default of 50";
 
+    const std::string ALL_DESCRIPTION =
+        "Effectively the same as removing the max restriction\n"
+        "if -a and -m N options are selected, then -a will overwite -m";
+
     const std::string MAX_DESCRIPTION =
         "Maximum number of sessions to display in the log; \n0 means all of them (slow)";
 
