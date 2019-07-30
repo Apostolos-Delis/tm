@@ -93,7 +93,16 @@ namespace tm_db {
          */
         void create_task_table();
 
-
+        /**
+         * Creates the sess table in the database
+         * Supports the following columns:
+         *  id: a primary key integer
+         *  task_id: a reference to the task being worked on
+         *  time_started: the time a task was started: in the form:
+         *   YYYY-MM-DD HH:MM:SS.SSS
+         *  length: integer representing the number of seconds the sess lasted
+         *  desc: a small description of the session
+         */
         void create_sess_table();
 
         /**
@@ -201,7 +210,7 @@ namespace tm_db {
         // Sess related funcitons
         void sess_log(bool condensed, int max_sessions);
         void add_sess(const std::string &start,
-                      const std::string &stop,
+                      int sess_length,
                       const std::string &task,
                       const std::string &description);
 

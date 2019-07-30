@@ -211,7 +211,9 @@ int main(int argc, char **argv) {
             tm_proj::handle_list(long_format, display_complete, proj_names);
     });
 
-    //auto stat = app.add_subcommand("stat", tm_cli::STAT_DESCRIPTION);
+    // Define tm stat
+    auto stat = app.add_subcommand("stat", tm_cli::STAT_DESCRIPTION);
+    stat->require_subcommand(1);
 
     CLI11_PARSE(app, argc, argv);
 

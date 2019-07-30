@@ -14,35 +14,35 @@ namespace tm_sess {
 
     // Descriptions of all the possible flags and subcommands
     const std::string START_DESCRIPTION =
-        "start a work session for a specified amount of time";
+        "Start a work session for a specified amount of time";
 
     const std::string TASK_DESCRIPTION =
         "The designated task to be worked on during the session";
 
     const std::string LENGTH_DESCRIPTION =
-        "the length of the session (in min)";
+        "The length of the session (in min)";
 
     const std::string INTERRUPT_DESCRIPTION =
-        "do not allow the session to be terminated (with ^C)";
+        "Do not allow the session to be terminated (with ^C)";
 
     const std::string OVERTIME_DESCRIPTION =
-        "no overtime means the session will end immediately\nupon reaching the time limit"\
+        "No overtime means the session will end immediately\nupon reaching the time limit"\
         "otherwise, the session will keep going until the\nuser stops it";
 
     const std::string DESC_DESCRIPTION =
-        "description of what exaclty you plan to do during the session";
+        "Add a brief description you plan to do during the session";
 
     const std::string LOG_DESCRIPTION =
-        "display a list of sessions, with a max limit default of 50";
+        "Display a list of sessions, with a max limit default of 50";
 
     const std::string MAX_DESCRIPTION =
-        "maximum number of sessions to display in the log; \n0 means all of them (slow)";
+        "Maximum number of sessions to display in the log; \n0 means all of them (slow)";
 
     const std::string CONDENSED_DESCRIPTION =
-        "display a minimal log of all the sessions";
+        "Display a minimal log of all the sessions";
 
     // functions for handling the different session subcommands
-    void handle_start(int length, bool no_interrupt, bool no_overtime,
+    void handle_start(int sess_length, bool no_interrupt, bool no_overtime,
                       const std::string &task,
                       const std::string &description);
     void handle_log(bool condensed, int max_sessions);

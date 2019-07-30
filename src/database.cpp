@@ -206,7 +206,7 @@ void tm_db::TMDatabase::create_task_table() {
             "\ttask     VARCHAR(128),\n"
             "\tproj_id  INTEGER DEFAULT NULL,\n"
             "\tcomplete INTEGER DEFAULT 0 NOT NULL,\n"
-            "\tdue      TEXT,\n"
+            "\tdue      VARCHAR(24),\n"
             "FOREIGN KEY (proj_id) REFERENCES projects(id)\n"
             ");";
     std::string err_message = "SQL error creating tasks table";
@@ -214,11 +214,26 @@ void tm_db::TMDatabase::create_task_table() {
 }
 
 /**
- * Creates the task table in the database if the tags table doesn't already exist
+ * Creates the sess table in the database
+ * Supports the following columns:
+ *  id: a primary key integer
+ *  task_id: a reference to the task being worked on
+ *  time_started: the time a task was started: in the form:
+ *   YYYY-MM-DD HH:MM:SS.SSS
+ *  length: integer representing the number of seconds the sess lasted
+ *  desc: a small description of the session
  */
 void tm_db::TMDatabase::create_sess_table() {
-    // TODO (25/07/2019): Create Sess table
-
+    const std::string sql = "CREATE TABLE IF NOT EXISTS sess (\n"
+            "\tid                INTEGER PRIMARY KEY NOT NULL,\n"
+            "\ttask_id           VARCHAR(128),\n"
+            "\ttime_started      TEXT,\n"
+            "\tcomplete          INTEGER DEFAULT 0 NOT NULL,\n"
+            "\tdesc              TEXT,\n"
+            "FOREIGN KEY (task_id) REFERENCES tasks(id)\n"
+            ");";
+    std::string err_message = "SQL error creating sess table";
+    this->execute_query(sql, NULL, err_message);
 }
 
 
@@ -679,7 +694,7 @@ void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
 
 
 void tm_db::TMDatabase::add_sess(const std::string &start,
-                                 const std::string &stop,
+                                 int sess_length,
                                  const std::string &task,
                                  const std::string &description) {
         // TODO (25/07/2019): Finish add_sess
