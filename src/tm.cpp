@@ -122,6 +122,8 @@ int main(int argc, char **argv) {
             tm_task::DISPLAY_ALL_DESCRIPTION);
     task_list->add_flag("--complete,-c", display_complete,
             tm_task::DISPLAY_DONE_DESCRIPTION);
+    task_list->add_flag("--reversed,-r", reversed,
+            tm_task::LIST_REVERSED_DESCRIPTION);
     task_list->add_option("--date,-d", specified_date,
             tm_task::LIST_DATE_DESCRIPTION);
     task_list->add_option("--project,-p", specified_proj,
@@ -134,6 +136,7 @@ int main(int argc, char **argv) {
             }
             tm_task::handle_list(list_long, max_tasks,
                                  display_complete,
+                                 reversed,
                                  specified_tags,
                                  specified_date,
                                  specified_proj);

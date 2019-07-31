@@ -71,6 +71,19 @@ namespace tm_utils {
      * @return returns a string of the form HH:MM:SS
      */
     std::string sec_to_time(int num_seconds);
+
+    /**
+     * Description: writes string to file
+     * @param[in] fname: the name of the file
+     * @param[in] input: the input string
+     */
+    void write_to_file(std::string fname, std::string input);
+
+    /**
+     * Description: removes a file
+     * @param[in] fname: the name of the file to remove
+     */
+    void remove_file(std::string fname);
 }
 
 // class for defining colors

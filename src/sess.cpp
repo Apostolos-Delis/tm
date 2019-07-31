@@ -25,6 +25,7 @@
 // Maximum session length is 3 hours
 #define MAX_SESS_LENGTH 3 * 60
 
+
 // Global variables relating to the session, allows for access within
 // functions
 static int len = 0;

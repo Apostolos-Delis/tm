@@ -50,6 +50,9 @@ namespace tm_task {
     const std::string LIST_DESCRIPTION =
         "Display the current tasks used";
 
+    const std::string LIST_REVERSED_DESCRIPTION = 
+        "List the tasks in reversed chronological order";
+
     const std::string MAX_DESCRIPTION =
         "The maximum number of tasks to be displayed, by default,\nthe max is 50";
 
@@ -108,6 +111,7 @@ namespace tm_task {
      * @param[in] max_tasks: the maximum number of tasks to display
      * @param[in] display_done: if true will also display completed tasks that
      * match the specified criteria
+     * @param[in] reversed: reverse the chronological order for when tasks are due
      * @param[in] specified tags: only display tags that have one of the tags
      * @param[in] specified date: only display tags that are due on the
      * specified date
@@ -115,6 +119,7 @@ namespace tm_task {
      * specified project
      */
     void handle_list(bool list_long, int max_tasks, bool display_done,
+                     bool reversed,
                      const std::vector<std::string> &specified_tags,
                      const std::string &specified_date,
                      const std::string &specified_proj);

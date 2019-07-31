@@ -12,10 +12,6 @@
 
 #include "database.hpp"
 
-#define TM_DIR "/.tm.d"
-#define DB_FILE "/data.sqlite3"
-
-
 /**
  * Description: Creates the dotfile directory for tm if it doesn't already
  * exist, then it opens an instance of a sqlite3 database for storing all the
@@ -31,13 +27,17 @@ tm_db::TMDatabase::TMDatabase() {
     int exit_code = sqlite3_open(db_file.c_str(), &db_);
 
     if (exit_code) {
+#ifndef _WIN32
         system("mkdir ~/.tm.d/");
         exit_code = sqlite3_open(db_file.c_str(), &db_);
         if (exit_code) {
+#endif
             std::cerr << "Error opening database "
                       << sqlite3_errmsg(this->db_) << std::endl;
             exit(1);
+#ifndef _WIN32
         }
+#endif
     }
 }
 
@@ -651,6 +651,7 @@ int static list_tasks_callback_long(void* data, int argc,
  * @param[in] max_tasks: the maximum number of tasks to display
  * @param[in] display_done: if true will also display completed tags that
  * match the specified criteria
+ * @param[in] reversed: reverse the chronological order for when tasks are due
  * @param[in] specified tags: only display tags that have one of the tags
  * @param[in] specified date: only display tags that are due on the
  * specified date
@@ -658,7 +659,7 @@ int static list_tasks_callback_long(void* data, int argc,
  * specified project
  */
 void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
-                                   bool display_done,
+                                   bool display_done, bool reversed,
                                    const std::vector<std::string> &specified_tags,
                                    const std::string &specified_date,
                                    const std::string &specified_proj) {
@@ -709,12 +710,11 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
         ss << ")\n";
         ss << "GROUP BY task_id\n";
     }
-    if (display_done) {
-        ss << "ORDER BY due DESC\n";
-    } else {
+    if (reversed) {
         ss << "ORDER BY due ASC\n";
+    } else {
+        ss << "ORDER BY due DESC\n";
     }
-
 
     if (max_tasks > 0) {
         ss << " LIMIT " << max_tasks;
@@ -767,29 +767,46 @@ static int list_sess(void* data, int argc, char** argv, char** cols) {
 
 /**
  * Description: Callback function for printing the sessions
+ * Note: in this callback, the output is written to SESS_LOG_FILE, and then
+ * a function call is made to feed that into the 'less' bash command
  */
 static int list_sess_long(void* data, int argc, char** argv, char** cols) {
-    std::cout << "\033[1;49;39mSession Number: " << argv[0] << std::endl;
-    std::cout << tm_color::NOCOLOR;
+    std::stringstream ss;
+    ss << "\033[1;49;39mSession Number: " << argv[0] << std::endl;
+    ss << tm_color::NOCOLOR;
     // task_id could be NULL
     if (argv[1]) {
-        std::cout << "Task to Complete: '" << argv[1] << "'" << std::endl;
+        ss << "Task to Complete: '" << argv[1] << "'" << std::endl;
     }
     std::string date_time(argv[2]);
-    std::cout << "Time and Date: " << date_time.substr(0, 16) << std::endl;
-    std::cout << "Duration: " << tm_utils::sec_to_time(atoi(argv[3]))
+    ss << "Time and Date: " << date_time.substr(0, 16) << std::endl;
+    ss << "Duration: " << tm_utils::sec_to_time(atoi(argv[3]))
               << " (H:MM:SS)" << std::endl;
     // description could also be null
     if (argv[4]) {
-        std::cout << "\n\t" << argv[4] << std::endl;
+        ss << "\n    " << argv[4] << std::endl;
     }
-    std::cout << std::endl;
+    ss << std::endl;
+
+#ifndef _WIN32
+    std::string homedir = tm_utils::home_dir();
+    std::string tm_dir = homedir + TM_DIR;
+    std::string sess_log_file = tm_dir + SESS_LOG_FILE;
+    tm_utils::write_to_file(sess_log_file, ss.str());
+#else 
+    std::cout << ss;
+#endif
     return 0;
 }
 
 
 void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
     this->create_sess_table();
+
+    // Only need this if condensed
+    std::string homedir = tm_utils::home_dir();
+    std::string tm_dir = homedir + TM_DIR;
+    std::string sess_log_file = tm_dir + SESS_LOG_FILE;
 
     std::stringstream ss;
     sqlite3_callback callback;
@@ -808,8 +825,10 @@ void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
         ss << "SELECT sess.id, tasks.task, sess.time_started, sess.length, "
            << "sess.desc\n"
            << "FROM sess LEFT JOIN tasks ON tasks.id = sess.task_id\n";
-        // TODO (30/07/2019): Pipe this to the bash command less
         callback = list_sess_long;
+
+        // Remove the sess file if it already exists
+        tm_utils::remove_file(sess_log_file);
     }
     ss << "ORDER BY sess.time_started DESC\n";
 
@@ -821,6 +840,14 @@ void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
         exit(1);
     }
     this->execute_query(ss.str(), callback, "SQL ERROR Querying sessions");
+
+#ifndef _WIN32
+    if (!condensed) {
+        // Output the log to the 'less' bash command
+        std::string cmd = "less " + sess_log_file;
+        system(cmd.c_str());
+    }
+#endif
 }
 
 

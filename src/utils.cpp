@@ -13,6 +13,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 
 
@@ -226,4 +227,34 @@ std::string tm_utils::sec_to_time(int num_seconds) {
        << num_min << ":" << std::setw(2) << std::setfill('0')
        << num_seconds;
     return ss.str();
+}
+
+/**
+ * Description: writes string to file
+ * @param[in] fname: the name of the file
+ * @param[in] input: the input string
+ */
+void tm_utils::write_to_file(std::string fname, std::string input) {
+#ifndef _WIN32
+    std::string cmd = "touch " + fname;
+    system(cmd.c_str());
+#endif
+    std::ofstream log_file; 
+    log_file.open(fname, std::ios_base::app);
+    log_file << input;
+    log_file.close();
+}
+
+/**
+ * Description: removes a file (only for UNIX)
+ * @param[in] fname: the name of the file to remove
+ */
+void tm_utils::remove_file(std::string fname) {
+#ifndef _WIN32
+    if(remove(fname.c_str()) != 0) {
+        std::cerr << "ERROR: Failed to remove file: '"
+                  << fname << "'" << std::endl;
+        exit(1);
+    }
+#endif
 }

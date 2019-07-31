@@ -18,6 +18,10 @@
 #include <sys/types.h>
 #include <pwd.h>
 
+#define TM_DIR "/.tm.d"
+#define DB_FILE "/data.sqlite3"
+#define SESS_LOG_FILE "/sess.log"
+
 
 namespace tm_db {
 
@@ -206,6 +210,7 @@ namespace tm_db {
          * @param[in] max_tasks: the maximum number of tasks to display
          * @param[in] display_done: if true will also display completed tags that
          * match the specified criteria
+         * @param[in] reversed: reverse the chronological order for when tasks are due
          * @param[in] specified_tags: only display tags that have one of the tags
          * @param[in] specified_date: only display tags that are due on the
          * specified date
@@ -213,6 +218,7 @@ namespace tm_db {
          * specified project
          */
         void list_tasks(bool list_long, int max_tasks, bool display_done,
+                        bool reversed,
                         const std::vector<std::string> &specified_tags,
                         const std::string &specified_date,
                         const std::string &specified_proj);

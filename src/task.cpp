@@ -79,11 +79,13 @@ void tm_task::handle_add(const std::string &task_name,
  * @param[in] max_tasks: the maximum number of tasks to display
  * @param[in] display_done: if true will also display completed tags that
  * match the specified criteria
+ * @param[in] reversed: reverse the chronological order for when tasks are due
  * @param[in] specified tags: only display tags that have one of the tags
  * @param[in] specified date: only display tags that are due on the specified date
  * @param[in] specified_proj: only display tags that are due in the specified project
  */
 void tm_task::handle_list(bool list_long, int max_tasks, bool display_done,
+                          bool reversed,
                           const std::vector<std::string> &specified_tags,
                           const std::string &specified_date,
                           const std::string &specified_proj) {
@@ -93,6 +95,6 @@ void tm_task::handle_list(bool list_long, int max_tasks, bool display_done,
         exit(1);
     }
     auto db = tm_db::TMDatabase();
-    db.list_tasks(list_long, max_tasks, display_done,
+    db.list_tasks(list_long, max_tasks, display_done, reversed,
                    specified_tags, specified_date, specified_proj);
 }
