@@ -43,6 +43,34 @@ int main(int argc, char **argv) {
                                   task_id, sess_desc);
     });
 
+    // Define sess add
+    std::string time_started = "00:00";
+    std::string date_started;
+    auto session_add = session->add_subcommand("add", tm_sess::ADD_DESCRIPTION);
+    session_add->add_option("--task-id,-i",
+            task_id, tm_sess::TASK_DESCRIPTION)->required();
+    session_add->add_option("--length,-l",
+            sess_length, tm_sess::LENGTH_DESCRIPTION)->required();
+    session_add->add_option("--description,-d",
+            sess_desc, tm_sess::DESC_DESCRIPTION);
+    session_add->add_option("--start-date,-s", date_started,
+            tm_sess::DATE_DESCRIPTION)->required();
+    session_add->add_option("--time,-t", time_started, 
+            tm_sess::TIME_DESCRIPTION);
+    session_add->callback( [&]() {
+            tm_sess::handle_add(sess_length, task_id, date_started,
+                                time_started, sess_desc);
+    });
+
+    // Define sess rm
+    int sess_id;
+    auto session_rm = session->add_subcommand("rm", tm_sess::RM_DESCRIPTION);
+    session_rm->add_option("--id,-i",
+            sess_id, tm_sess::ID_DESCRIPTION)->required();
+    session_rm->callback( [&]() {
+            tm_sess::handle_remove(sess_id);
+    });
+
     // Define sess log
     int max_sessions = DEFAULT_LOG_LENGTH;
     bool condensed = false;

@@ -32,6 +32,21 @@ namespace tm_sess {
     const std::string DESC_DESCRIPTION =
         "Add a brief description you plan to do during the session";
 
+    const std::string ADD_DESCRIPTION =
+        "Adds a sess to the system that occured in the past";
+
+    const std::string DATE_DESCRIPTION =
+        "The date that the session was started on\n"
+        "Format: YYYY-MM-DD";
+
+    const std::string TIME_DESCRIPTION =
+        "The time that the session was started on\n"
+        "Format: HH:MM";
+
+    const std::string RM_DESCRIPTION = "Removes a session from the system";
+
+    const std::string ID_DESCRIPTION = "The id of the session to be removed";
+
     const std::string LOG_DESCRIPTION =
         "Display a list of sessions, with a max limit default of 50";
 
@@ -69,6 +84,31 @@ namespace tm_sess {
      */
     void handle_log(bool condensed, int max_sessions);
 
+    /**
+     * Description: removes a session from the sess table
+     * @param[in] sess_id, the id of the session to remove
+     */
+    void handle_remove(int sess_id);
+
+    /**
+     * Description: adds a session to the database (this is in case the user
+     * worked for a certain period of time, but forgot to log the session)
+     * @param[in] sess_length: the length, in min of the session to add, up to a
+     * maximum of 4.5 hours (270 min)
+     * @param[in] task_id: the task id of the task worked on during the session
+     * @param[in] start_date: a string containing the start date of the session
+     * Format: YYYY-MM-DD
+     * @param[in] start_time: the start time of the sequence
+     * Format: HH:MM
+     * @param[in] description: the session description
+     *
+     * NOTE: the combination of the date and the start time, must not be in the future,
+     * you can only add sessions that 'in theory' have already happened
+     */
+    void handle_add(int sess_length, int task_id,
+                             const std::string start_date,
+                             const std::string start_time,
+                             const std::string &description);
 }
 
 #endif // SESS_HPP_

@@ -71,6 +71,9 @@ namespace tm_db {
          * @param[in] table: the name of the table to inspect
          * @return an int of the number of rows in a table, returns -1 if no table
          * is identified
+         *
+         * NOTE: this can also be used to see how many items are returned from a
+         * subquery
          */
         int num_rows(const std::string &table);
 
@@ -241,6 +244,12 @@ namespace tm_db {
          */
         void add_sess(const std::string &start, int sess_length,
                       int &task_id, const std::string &description);
+
+        /**
+         * Description: removes a session from the sess table
+         * @param[in] sess_id: the id of the session to remove
+         */
+        void remove_sess(int sess_id);
 
         /**
          * Description: remove a project from the projects table

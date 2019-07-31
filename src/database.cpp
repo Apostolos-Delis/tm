@@ -87,6 +87,9 @@ static int count_callback(void *count, int argc, char **argv, char **azColName) 
  * @param[in] table: the name of the table to inspect
  * @return an int of the number of rows in a table, returns -1 if no table
  * is identified
+ *
+ * NOTE: this can also be used to see how many items are returned from a
+ * subquery
  */
 int tm_db::TMDatabase::num_rows(const std::string &table){
     int num_rows = -1;
@@ -875,6 +878,15 @@ void tm_db::TMDatabase::add_sess(const std::string &start,
                                  int &task_id,
                                  const std::string &description) {
     this->create_sess_table();
+
+    std::stringstream ss_check;
+    ss_check << "(SELECT id FROM tasks WHERE id = " << task_id << ")";
+    if (this->num_rows(ss_check.str()) != 1) {
+        std::cerr << "ERROR: '" << task_id 
+                  << "' is not a valid task id" << std::endl;
+        exit(1);
+    }
+
     std::stringstream ss;
     if (!description.empty()) {
         ss << "INSERT INTO sess (task_id, time_started, desc, length)\nVALUES("
@@ -889,6 +901,17 @@ void tm_db::TMDatabase::add_sess(const std::string &start,
     }
     std::string sql(ss.str());
     this->execute_query(sql, NULL, "SQL error inserting sess into table");
+}
+
+
+/**
+ * Description: removes a session from the sess table
+ * @param[in] sess_id: the id of the session to remove
+ */
+void tm_db::TMDatabase::remove_sess(int sess_id) {
+    std::stringstream ss;
+    ss << "DELETE FROM sess WHERE id = " << sess_id << ";";
+    this->execute_query(ss.str(), NULL, "SQL error removing sess from table");
 }
 
 

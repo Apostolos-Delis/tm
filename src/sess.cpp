@@ -107,7 +107,7 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
     // Assert that the id belongs to an incomplete existing task
     auto db = tm_db::TMDatabase();
     if (!db.valid_task_id(task_id)) {
-        std::cerr << "'" << task_id
+        std::cerr << "ERROR: '" << task_id
                   << "' is not an id for any current incomplete task."
                   << std::endl;
         std::cerr << "Run 'tm task list --all' to see all current"
@@ -191,4 +191,60 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
 void tm_sess::handle_log(bool condensed, int max_sessions) {
     auto db = tm_db::TMDatabase();
     db.sess_log(condensed, max_sessions);
+}
+
+
+/**
+ * Description: removes a session from the sess table
+ * @param[in] sess_id, the id of the session to remove
+ */
+void tm_sess::handle_remove(int sess_id) {
+    auto db = tm_db::TMDatabase();
+    db.remove_sess(sess_id);
+}
+
+
+/**
+ * Description: adds a session to the database (this is in case the user 
+ * worked for a certain period of time, but forgot to log the session)
+ * @param[in] sess_length: the length, in min of the session to add, up to a
+ * maximum of 4.5 hours (270 min)
+ * @param[in] task_id: the task id of the task worked on during the session
+ * @param[in] start_date: a string containing the start date of the session
+ * Format: YYYY-MM-DD
+ * @param[in] start_time: the start time of the sequence
+ * Format: HH:MM
+ * @param[in] description: the session description
+ * 
+ * NOTE: the combination of the date and the start time, must not be in the future,
+ * you can only add sessions that 'in theory' have already happened
+ */
+void tm_sess::handle_add(int sess_length, int task_id,
+                         const std::string start_date,
+                         const std::string start_time,
+                         const std::string &description) {
+    auto db = tm_db::TMDatabase();
+    if (sess_length > 270 || sess_length <= 0) {
+        std::cerr << "ERROR: the length of the session must be a"
+                  << " positive integer from 1 - 270" << std::endl;
+        exit(1);
+    }
+    if (!tm_utils::valid_date(start_date)) {
+        std::cerr << "ERROR: '" << start_date 
+                  << "' is not valid date." << std::endl;
+        exit(1);
+    }
+    if (!tm_utils::valid_time(start_time)) {
+        std::cerr << "ERROR: '" << start_time 
+                  << "' is not valid time." << std::endl;
+        exit(1);
+    }
+    std::string date = start_date + " " + start_date;
+    if (date > tm_utils::current_datetime()) {
+        std::cerr << "ERROR: cannot pick a date in the future." << std::endl;
+        exit(1);
+    }
+    db.add_sess(start_date + ":00.000", sess_length * 60, 
+                task_id, description);
+
 }
