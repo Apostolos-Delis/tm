@@ -212,6 +212,10 @@ namespace tm_db {
          * match the specified criteria
          * @param[in] reversed: reverse the chronological order for when tasks are due
          * @param[in] specified_tags: only display tags that have one of the tags
+         * @param[in] date_from: only display tags that are due after the
+         * specified date
+         * @param[in] date_till: only display tags that are due until the
+         * specified date
          * @param[in] specified_date: only display tags that are due on the
          * specified date
          * @param[in] specified_proj: only display tags that are due in the
@@ -221,6 +225,8 @@ namespace tm_db {
                         bool reversed,
                         const std::vector<std::string> &specified_tags,
                         const std::string &specified_date,
+                        const std::string &date_from,
+                        const std::string &date_till,
                         const std::string &specified_proj);
 
         // Sess related funcitons

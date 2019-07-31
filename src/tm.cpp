@@ -113,6 +113,7 @@ int main(int argc, char **argv) {
     bool display_complete = false;
     bool display_all = false;
     std::vector<std::string> specified_tags;
+    std::string date_till, date_from;
     std::string specified_date, specified_proj;
     auto task_list = task->add_subcommand("list", tm_task::LIST_DESCRIPTION);
     task_list->add_option("--max,-m", max_tasks, tm_task::MAX_DESCRIPTION);
@@ -126,6 +127,10 @@ int main(int argc, char **argv) {
             tm_task::LIST_REVERSED_DESCRIPTION);
     task_list->add_option("--date,-d", specified_date,
             tm_task::LIST_DATE_DESCRIPTION);
+    task_list->add_option("--until,-u", date_till,
+            tm_task::LIST_TILL_DESCRIPTION);
+    task_list->add_option("--from,-f", date_from,
+            tm_task::LIST_FROM_DESCRIPTION);
     task_list->add_option("--project,-p", specified_proj,
             tm_task::LIST_PROJ_DESCRIPTION);
     task_list->add_option("--tags,-t", specified_tags,
@@ -134,11 +139,18 @@ int main(int argc, char **argv) {
             if (display_all) {
                 max_tasks = 0;
             }
+            if (!specified_date.empty() && 
+                    (!date_from.empty() || !date_till.empty())){
+                std::cerr << "ERROR: cannot set both --date and either"
+                          << " --from or --after options" << std::endl;
+                exit(1);
+            }
             tm_task::handle_list(list_long, max_tasks,
                                  display_complete,
                                  reversed,
                                  specified_tags,
                                  specified_date,
+                                 date_from, date_till,
                                  specified_proj);
     });
 

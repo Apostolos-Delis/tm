@@ -160,7 +160,7 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
         db.add_sess(start, len, sess_task_id, sess_desc);
         return;
     }
-    int max_overtime = sess_length / 2;
+    int max_overtime = sess_length * 30;
     // Allow the user to exit out of overtime
     nointerrupt = false;
 

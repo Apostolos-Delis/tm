@@ -70,7 +70,16 @@ namespace tm_task {
         "Display only tasks that have a tag that matches one\nof the tags in the specified list";
 
     const std::string LIST_DATE_DESCRIPTION =
-        "Display only tasks that occur during that date";
+        "Display only tasks that occur during that date specified.\n"
+        "Must be of the form 'YYYY-MM-DD'";
+
+    const std::string LIST_FROM_DESCRIPTION =
+        "Display only tasks that occur after the date specified.\n"
+        "Must be of the form 'YYYY-MM-DD'";
+
+    const std::string LIST_TILL_DESCRIPTION =
+        "Display only tasks that occur unitl the date specified.\n"
+        "Must be of the form 'YYYY-MM-DD'";
 
     const std::string LIST_PROJ_DESCRIPTION =
         "Display only tasks that are part of the specified project";
@@ -113,6 +122,10 @@ namespace tm_task {
      * match the specified criteria
      * @param[in] reversed: reverse the chronological order for when tasks are due
      * @param[in] specified tags: only display tags that have one of the tags
+     * @param[in] date_till: only display tags that are due until the
+     * specified date
+     * @param[in] date_from: only display tags that are due after the
+     * specified date
      * @param[in] specified date: only display tags that are due on the
      * specified date
      * @param[in] specified_proj: only display tags that are due in the
@@ -122,6 +135,8 @@ namespace tm_task {
                      bool reversed,
                      const std::vector<std::string> &specified_tags,
                      const std::string &specified_date,
+                     const std::string &date_from,
+                     const std::string &date_till,
                      const std::string &specified_proj);
 
 }

@@ -652,16 +652,22 @@ int static list_tasks_callback_long(void* data, int argc,
  * @param[in] display_done: if true will also display completed tags that
  * match the specified criteria
  * @param[in] reversed: reverse the chronological order for when tasks are due
- * @param[in] specified tags: only display tags that have one of the tags
- * @param[in] specified date: only display tags that are due on the
+ * @param[in] specified_tags: only display tags that have one of the tags
+ * @param[in] date_from: only display tags that are due after the
+ * specified date
+ * @param[in] date_till: only display tags that are due until the
+ * specified date
+ * @param[in] specified_date: only display tags that are due on the
  * specified date
  * @param[in] specified_proj: only display tags that are due in the
  * specified project
  */
-void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
+void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks, 
                                    bool display_done, bool reversed,
                                    const std::vector<std::string> &specified_tags,
                                    const std::string &specified_date,
+                                   const std::string &date_from,
+                                   const std::string &date_till,
                                    const std::string &specified_proj) {
     this->create_task_table();
 
@@ -683,6 +689,12 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
     }
     if (!specified_date.empty()) {
         ss << "AND date(tasks.due) = date('" << specified_date << "')\n";
+    }
+    if (!date_from.empty()) {
+        ss << "AND date(tasks.due) >= date('" << date_from << "')\n";
+    }
+    if (!date_till.empty()) {
+        ss << "AND date(tasks.due) <= date('" << date_till << "')\n";
     }
     if (!specified_proj.empty()) {
         int proj_id = this->proj_id(specified_proj);

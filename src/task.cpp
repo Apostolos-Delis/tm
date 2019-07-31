@@ -72,29 +72,47 @@ void tm_task::handle_add(const std::string &task_name,
     db.add_task(task);
 }
 
-
 /**
  * Description: display a list of tasks, matching the criteria
  * @param[in] list_long: display additional information about each task
  * @param[in] max_tasks: the maximum number of tasks to display
- * @param[in] display_done: if true will also display completed tags that
+ * @param[in] display_done: if true will also display completed tasks that
  * match the specified criteria
  * @param[in] reversed: reverse the chronological order for when tasks are due
  * @param[in] specified tags: only display tags that have one of the tags
- * @param[in] specified date: only display tags that are due on the specified date
- * @param[in] specified_proj: only display tags that are due in the specified project
+ * @param[in] date_till: only display tags that are due until the
+ * specified date
+ * @param[in] date_from: only display tags that are due after the
+ * specified date
+ * @param[in] specified date: only display tags that are due on the
+ * specified date
+ * @param[in] specified_proj: only display tags that are due in the
+ * specified project
  */
 void tm_task::handle_list(bool list_long, int max_tasks, bool display_done,
-                          bool reversed,
-                          const std::vector<std::string> &specified_tags,
-                          const std::string &specified_date,
-                          const std::string &specified_proj) {
+                 bool reversed,
+                 const std::vector<std::string> &specified_tags,
+                 const std::string &specified_date,
+                 const std::string &date_from,
+                 const std::string &date_till,
+                 const std::string &specified_proj) {
     if (!specified_date.empty() && !tm_utils::valid_date(specified_date)) {
         std::cerr << "ERROR: '" << specified_date
                   << "' is not a valid date!" << std::endl;
         exit(1);
     }
+    if (!date_from.empty() && !tm_utils::valid_date(date_from)) {
+        std::cerr << "ERROR: '" << date_from
+                  << "' is not a valid date!" << std::endl;
+        exit(1);
+    }
+    if (!date_till.empty() && !tm_utils::valid_date(date_till)) {
+        std::cerr << "ERROR: '" << date_till
+                  << "' is not a valid date!" << std::endl;
+        exit(1);
+    }
     auto db = tm_db::TMDatabase();
     db.list_tasks(list_long, max_tasks, display_done, reversed,
-                   specified_tags, specified_date, specified_proj);
+                  specified_tags, specified_date, date_from, 
+                  date_till, specified_proj);
 }
