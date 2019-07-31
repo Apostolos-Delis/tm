@@ -594,6 +594,15 @@ int static list_tasks_callback_long(void* data, int argc,
         exit(1);
     }
     list_tasks_callback(data, argc, argv, cols);
+
+    std::cout << "\033[1;39mTime Worked: \033[0m";
+    if (argv[5]) {
+        std::cout << tm_utils::sec_to_time(atoi(argv[5]));
+    } else {
+        std::cout << tm_utils::sec_to_time(0);
+    }
+    std::cout << " (H:MM:SS)"<< std::endl;
+
     if (argv[4]) {
         std::cout << "\033[1;39mProject: \033[0m" << argv[4] << std::endl;
     }
@@ -677,8 +686,9 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
     std::stringstream ss;
     if (list_long) {
         ss << "SELECT DISTINCT tasks.id, tasks.complete, tasks.due, tasks.task, "
-           << "projects.name FROM tasks"
-           << "\nLEFT JOIN projects ON tasks.proj_id = projects.id\n";
+           << "projects.name, SUM(sess.length) FROM tasks\n"
+           << "LEFT JOIN projects ON tasks.proj_id = projects.id\n"
+           << "LEFT JOIN sess ON sess.task_id = tasks.id\n";
     } else {
         ss << "SELECT DISTINCT tasks.id, tasks.complete, tasks.due, "
            << "tasks.task FROM tasks\n";
@@ -723,7 +733,10 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
             ss << " task_tags.tag_id = " << tag_id;
         }
         ss << ")\n";
-        ss << "GROUP BY task_id\n";
+        ss << "GROUP BY task_tags.task_id\n";
+    }
+    if (list_long) {
+        ss << "GROUP BY tasks.id\n";
     }
     if (reversed) {
         ss << "ORDER BY due ASC\n";
@@ -771,8 +784,8 @@ static int list_sess(void* data, int argc, char** argv, char** cols) {
     } else {
         task_id = "N/A";
     }
-    std::string spaces((7 - strlen(argv[0])), ' ');
-    std::string spaces1((7 - strlen(argv[1])), ' ');
+    std::string spaces((6 - strlen(argv[0])), ' ');
+    std::string spaces1((8 - strlen(argv[1])), ' ');
 
     std::cout << argv[0] << spaces << argv[1] << spaces1
               << tm_utils::sec_to_time(atoi(argv[2])) << " (H:MM:SS)  "
@@ -817,6 +830,7 @@ static int list_sess_long(void* data, int argc, char** argv, char** cols) {
 
 void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
     this->create_sess_table();
+    this->create_task_table();
 
     // Only need this if condensed
     std::string homedir = tm_utils::home_dir();
@@ -834,7 +848,7 @@ void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
         if (this->num_rows("(" + ss.str() + ")") > 0) {
             std::string spaces(13, ' ');
             std::cout << "\033[1;4;49;39mID  Task ID   Length"
-                      << spaces << "Date\033[0m" << std::endl;
+                      << spaces << "Date      \033[0m" << std::endl;
         }
     } else {
         ss << "SELECT sess.id, tasks.task, sess.time_started, sess.length, "
@@ -844,6 +858,8 @@ void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
 
         // Remove the sess file if it already exists
         tm_utils::remove_file(sess_log_file);
+        // Recreate an empty file
+        tm_utils::make_file(sess_log_file);
     }
     ss << "ORDER BY sess.time_started DESC\n";
 
@@ -857,7 +873,7 @@ void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
     this->execute_query(ss.str(), callback, "SQL ERROR Querying sessions");
 
 #ifndef _WIN32
-    if (!condensed) {
+    if (this->num_rows("(" + ss.str() + ")") > 0 && !condensed) {
         // Output the log to the 'less' bash command
         std::string cmd = "less " + sess_log_file;
         system(cmd.c_str());
@@ -1040,6 +1056,14 @@ int static list_projects_callback_long(void* data, int argc,
     }
     list_projects_callback(data, argc, argv, cols);
 
+    std::cout << "\033[1;39mTime Worked: \033[0m";
+    if (argv[3]) {
+        std::cout << tm_utils::sec_to_time(atoi(argv[3]));
+    } else {
+        std::cout << tm_utils::sec_to_time(0);
+    }
+    std::cout << " (H:MM:SS)"<< std::endl;
+
     std::stringstream ss1;
     ss1 << "SELECT id, due, task\nFROM tasks\n"
         << "WHERE complete = 0 AND proj_id = "
@@ -1071,7 +1095,7 @@ int static list_projects_callback_long(void* data, int argc,
             exit(1);
         }
     } else {
-        std::cout << "\tAll tasks completed at this time." << std::endl;
+        std::cout << "All tasks completed at this time." << std::endl;
     }
     std::cout << std::endl;
     sqlite3_close(db);
@@ -1092,10 +1116,20 @@ void tm_db::TMDatabase::list_projects(bool show_tasks, bool display_done,
     this->create_proj_table();
 
     std::stringstream ss;
-    ss << "SELECT complete, name, id FROM projects\n";
+    if (show_tasks) {
+        ss << "SELECT projects.complete, projects.name, projects.id, "
+           << "SUM(sess.length) FROM projects\n"
+           << "LEFT JOIN tasks ON tasks.proj_id = projects.id\n"
+           << "LEFT JOIN sess ON sess.task_id = tasks.id\n";
+    } else {
+        ss << "SELECT complete, name, id FROM projects\n";
+    }
     ss << "WHERE 1 = 1\n";
     if (!display_done) {
-        ss << "AND complete = 0\n";
+        ss << "AND projects.complete = 0\n";
+    }
+    if (show_tasks) {
+        ss << "GROUP BY tasks.proj_id\n";
     }
     std::string sql(ss.str());
 

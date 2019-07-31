@@ -16,13 +16,13 @@
 
 namespace tm_cli {
     // Current version used in the app
-    const std::string VERSION = "1.0, last updated: 2019-06-17";
+    const std::string VERSION = "1.2, last updated: 2019-07-31";
 
     const std::string VERSION_FLAG_DESCRIPTION = "Display tm version info";
 
     // Description that will be passed into a CLI::App instantiation when
     // parsing the arguments
-    const std::string DESCRIPTION = "tm, the task manager right in your terminal!";
+    const std::string DESCRIPTION = "tm, the task manager right in your terminal.";
 
     // Subcommand Descriptions
     const std::string SESSION_DESCRIPTION =

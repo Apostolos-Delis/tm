@@ -239,12 +239,12 @@ void tm_sess::handle_add(int sess_length, int task_id,
                   << "' is not valid time." << std::endl;
         exit(1);
     }
-    std::string date = start_date + " " + start_date;
+    std::string date = start_date + " " + start_time;
     if (date > tm_utils::current_datetime()) {
         std::cerr << "ERROR: cannot pick a date in the future." << std::endl;
         exit(1);
     }
-    db.add_sess(start_date + ":00.000", sess_length * 60, 
+    db.add_sess(date + ":00.000", sess_length * 60, 
                 task_id, description);
 
 }

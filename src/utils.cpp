@@ -231,29 +231,53 @@ std::string tm_utils::sec_to_time(int num_seconds) {
 
 /**
  * Description: writes string to file
- * @param[in] fname: the name of the file
+ * @param[in] file_name: the name of the file
  * @param[in] input: the input string
  */
-void tm_utils::write_to_file(std::string fname, std::string input) {
-#ifndef _WIN32
-    std::string cmd = "touch " + fname;
-    system(cmd.c_str());
-#endif
+void tm_utils::write_to_file(std::string file_name, std::string input) {
     std::ofstream log_file; 
-    log_file.open(fname, std::ios_base::app);
+    log_file.open(file_name, std::ios_base::app);
     log_file << input;
     log_file.close();
 }
 
+
+/**
+ * Description: check if file exists
+ * @param[in] file_name: the name of the file (full path) to check
+ * @return true if the file exists, else false
+ */
+inline bool file_exists(std::string file_name) {
+    std::ifstream infile(file_name);
+    return infile.good();
+}
+
+
+/**
+ * Description: create an empty file, if the file exists, does nothing
+ * @param[in] file_name: the name of the file to create
+ */
+void tm_utils::make_file(std::string file_name) {
+    if (file_exists(file_name)) {
+        return;
+    }
+    std::fstream fs;
+    fs.open(file_name, std::ios::out);
+    fs.close();
+}
+
 /**
  * Description: removes a file (only for UNIX)
- * @param[in] fname: the name of the file to remove
+ * @param[in] file_name: the name of the file to remove
  */
-void tm_utils::remove_file(std::string fname) {
+void tm_utils::remove_file(std::string file_name) {
+    if (!file_exists(file_name)) {
+        return;
+    }
 #ifndef _WIN32
-    if(remove(fname.c_str()) != 0) {
+    if(remove(file_name.c_str()) != 0) {
         std::cerr << "ERROR: Failed to remove file: '"
-                  << fname << "'" << std::endl;
+                  << file_name << "'" << std::endl;
         exit(1);
     }
 #endif

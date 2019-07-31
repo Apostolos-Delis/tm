@@ -74,16 +74,22 @@ namespace tm_utils {
 
     /**
      * Description: writes string to file
-     * @param[in] fname: the name of the file
+     * @param[in] file_name: the name of the file
      * @param[in] input: the input string
      */
-    void write_to_file(std::string fname, std::string input);
+    void write_to_file(std::string file_name, std::string input);
+
+    /**
+     * Description: create an empty file
+     * @param[in] file_name: the name of the file to create
+     */
+    void make_file(std::string file_name);
 
     /**
      * Description: removes a file
-     * @param[in] fname: the name of the file to remove
+     * @param[in] file_name: the name of the file to remove
      */
-    void remove_file(std::string fname);
+    void remove_file(std::string file_name);
 }
 
 // class for defining colors
