@@ -75,12 +75,15 @@ int main(int argc, char **argv) {
     int max_sessions = DEFAULT_LOG_LENGTH;
     bool condensed = false;
     bool sess_log_all = false;
+    bool reversed = false;
     auto session_log = session->add_subcommand("log",
             tm_sess::LOG_DESCRIPTION);
     session_log->add_option("--max,-m", max_sessions,
             tm_sess::MAX_DESCRIPTION, true);
     session_log->add_flag("--all,-a", sess_log_all,
             tm_sess::ALL_DESCRIPTION);
+    session_log->add_flag("--reverse,-r", reversed,
+            tm_sess::REVERSED_DESCRIPTION);
     session_log->add_flag("--condensed,-c", condensed,
             tm_sess::CONDENSED_DESCRIPTION);
 
@@ -89,7 +92,7 @@ int main(int argc, char **argv) {
             if (sess_log_all) {
                 max_sessions = 0;
             }
-            tm_sess::handle_log(condensed, max_sessions);
+            tm_sess::handle_log(condensed, max_sessions, reversed);
     });
 
     // Define tm task
@@ -106,7 +109,6 @@ int main(int argc, char **argv) {
             tm_task::handle_rm(task_id, hard_remove);
     });
     // Define task done
-    bool reversed;
     auto task_done = task->add_subcommand("done", tm_task::DONE_DESCRIPTION);
     task_done->add_option("--id,-i", task_id,
             tm_task::ID_DESCRIPTION)->required();

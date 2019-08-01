@@ -187,10 +187,11 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
  * as well as the task_id, otherwise, the log is similar in style to 'git log'
  * @param[in] max_sessions: The max number of sessions to display, default is defined by
  * DEFAULT_LOG_LENGTH
+ * @param[in] reversed: Display the sessions in reversed chronological order if true
  */
-void tm_sess::handle_log(bool condensed, int max_sessions) {
+void tm_sess::handle_log(bool condensed, int max_sessions, bool reversed) {
     auto db = tm_db::TMDatabase();
-    db.sess_log(condensed, max_sessions);
+    db.sess_log(condensed, max_sessions, reversed);
 }
 
 

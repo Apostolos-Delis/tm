@@ -828,7 +828,17 @@ static int list_sess_long(void* data, int argc, char** argv, char** cols) {
 }
 
 
-void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
+/**
+ * Description: Display a log of sessions, similar to 'git log'
+ * @param[in] condensed: Show a minimzed version of the log
+ * @param[in] max_sessions: The number of maximum sessions to
+ * display in the log
+ * @param[in] condensed: Show a minimzed version of the log
+ * @param[in] reveresd: Display the sessions in reversed chronological
+ * order
+ */
+void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions, 
+                                 bool reversed) {
     this->create_sess_table();
     this->create_task_table();
 
@@ -861,7 +871,11 @@ void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions) {
         // Recreate an empty file
         tm_utils::make_file(sess_log_file);
     }
-    ss << "ORDER BY sess.time_started DESC\n";
+    if (reversed) {
+        ss << "ORDER BY sess.time_started ASC\n";
+    } else {
+        ss << "ORDER BY sess.time_started DESC\n";
+    }
 
     if (max_sessions > 0) {
        ss << "LIMIT " << max_sessions;

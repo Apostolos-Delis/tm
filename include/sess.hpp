@@ -50,6 +50,9 @@ namespace tm_sess {
     const std::string LOG_DESCRIPTION =
         "Display a list of sessions, with a max limit default of 50";
 
+    const std::string REVERSED_DESCRIPTION =
+        "Display the sessions in reversed chronological order";
+
     const std::string ALL_DESCRIPTION =
         "Effectively the same as removing the max restriction\n"
         "if -a and -m N options are selected, then -a will overwite -m";
@@ -81,8 +84,9 @@ namespace tm_sess {
      * as well as the task_id, otherwise, the log is similar in style to 'git log'
      * @param[in] max_sessions: The max number of sessions to display, default is defined by
      * DEFAULT_LOG_LENGTH
+     * @param[in] reversed: Display the sessions in reversed chronological order if true
      */
-    void handle_log(bool condensed, int max_sessions);
+    void handle_log(bool condensed, int max_sessions, bool reversed);
 
     /**
      * Description: removes a session from the sess table

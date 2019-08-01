@@ -233,7 +233,17 @@ namespace tm_db {
                         const std::string &specified_proj);
 
         // Sess related funcitons
-        void sess_log(bool condensed, int max_sessions);
+
+        /**
+         * Description: Display a log of sessions, similar to 'git log'
+         * @param[in] condensed: Show a minimzed version of the log
+         * @param[in] max_sessions: The number of maximum sessions to
+         * display in the log
+         * @param[in] condensed: Show a minimzed version of the log
+         * @param[in] reveresd: Display the sessions in reversed chronological
+         * order
+         */
+        void sess_log(bool condensed, int max_sessions, bool reversed);
 
         /**
          * Description: Inserts a session into the sess table
