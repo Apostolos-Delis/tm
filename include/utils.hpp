@@ -103,7 +103,7 @@ namespace tm_color {
             "magenta", "light-magenta",
             "cyan", "light-cyan",
             "light-gray", "dark-gray",
-            "black", "white"
+            "black", "white", "none"
     });
 
     const std::string NOCOLOR = "\033[0m";
@@ -125,6 +125,7 @@ namespace tm_color {
             {"light-magenta", "\033[95m"},
             {"light-cyan", "\033[96m"},
             {"white", "\033[97m"},
+            {"none", ""}
     };
 
     const std::unordered_map<std::string, std::string> BACKGROUNDS = {
@@ -143,7 +144,7 @@ namespace tm_color {
             {"light-blue", "\033[0;94;39m"},
             {"light-magenta", "\033[0;95;39m"},
             {"light-cyan", "\033[0;96;39m"},
-            {"white", "\033[0;97;39m"},
+            {"white", "\033[0;97;39m"}
     };
 }
 

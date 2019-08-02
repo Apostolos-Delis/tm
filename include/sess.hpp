@@ -10,6 +10,9 @@
 // Default number of sessions to display with tm sess log
 #define DEFAULT_LOG_LENGTH 50
 
+// Default session of 25 min, based on pomodoro technique
+#define DEFAULT_SESS_LENGTH 25
+
 namespace tm_sess {
 
     // Descriptions of all the possible flags and subcommands

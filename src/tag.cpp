@@ -42,8 +42,8 @@ void tm_tag::handle_add(const std::string &tag_name, std::string color){
     // check to make sure that the color is valid,
     auto it = tm_color::VALID_COLORS.find(color);
     if (it == tm_color::VALID_COLORS.end()) {
-        std::cerr << "ERROR: " << color
-                  << " is not a valid color" << std::endl;
+        std::cerr << "ERROR: '" << color
+                  << "' is not a valid color" << std::endl;
         exit(1);
     }
     auto db = tm_db::TMDatabase();

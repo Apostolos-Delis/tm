@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     // Define sess start
     std::string sess_desc = "";
     int task_id;
-    int sess_length;
+    int sess_length = DEFAULT_SESS_LENGTH;
     bool no_interupt = false;
     bool no_overtime = false;
     auto session_start = session->add_subcommand("start",
@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     session_start->add_option("--task,-t",
             task_id, tm_sess::TASK_DESCRIPTION)->required();
     session_start->add_option("--length,-l",
-            sess_length, tm_sess::LENGTH_DESCRIPTION)->required();
+            sess_length, tm_sess::LENGTH_DESCRIPTION, true);
     session_start->add_flag("--no-interrupt,-i",
             no_interupt, tm_sess::INTERRUPT_DESCRIPTION);
     session_start->add_flag("--no-overtime,-o", no_overtime,
@@ -130,7 +130,8 @@ int main(int argc, char **argv) {
     task_add->add_option("--proj,-p", proj_name, tm_task::PROJ_DESCRIPTION);
     task_add->add_option("--date,-d", due_date,
             tm_task::DATE_DESCRIPTION)->required();
-    task_add->add_option("--time,-t", due_time, tm_task::TIME_DESCRIPTION);
+    task_add->add_option("--time,-t", due_time, 
+                         tm_task::TIME_DESCRIPTION, true);
     task_add->add_option("--tags,-l", tags, tm_task::TAGS_DESCRIPTION);
     task_add->callback( [&]() {
             tm_task::handle_add(task_name, proj_name, due_date,
@@ -138,7 +139,7 @@ int main(int argc, char **argv) {
     });
 
     // Define task list
-    int max_tasks = 50;
+    int max_tasks = DEFAULT_LOG_LENGTH;
     bool list_long = false;
     bool display_complete = false;
     bool display_all = false;
@@ -146,7 +147,8 @@ int main(int argc, char **argv) {
     std::string date_till, date_from;
     std::string specified_date, specified_proj;
     auto task_list = task->add_subcommand("list", tm_task::LIST_DESCRIPTION);
-    task_list->add_option("--max,-m", max_tasks, tm_task::MAX_DESCRIPTION);
+    task_list->add_option("--max,-m", max_tasks, 
+            tm_task::MAX_DESCRIPTION, true);
     task_list->add_flag("--long,-l", list_long,
             tm_task::LIST_LONG_DESCRIPTION);
     task_list->add_flag("--all,-a", display_all,
@@ -199,11 +201,12 @@ int main(int argc, char **argv) {
     });
 
     // Define tag add
-    std::string color;
+    std::string color = "none";
     auto tag_add = tag->add_subcommand("add", tm_tag::ADD_DESCRIPTION);
     tag_add->add_option("--name,-n", tag_name,
             tm_tag::NAME_DESCRIPTION)->required();
-    tag_add->add_option("--color,-c", color, tm_tag::COLOR_DESCRIPTION);
+    tag_add->add_option("--color,-c", color, 
+            tm_tag::COLOR_DESCRIPTION, true);
     tag_add->callback( [&]() {
             tm_tag::handle_add(tag_name, color);
     });
@@ -213,7 +216,7 @@ int main(int argc, char **argv) {
     bool no_color = false;
     auto tag_list = tag->add_subcommand("list", tm_tag::LIST_DESCRIPTION);
     tag_list->add_option("--max,-m", max_tags, tm_tag::MAX_DESCRIPTION);
-    tag_list->add_flag("--no-color", no_color, tm_tag::NOCOLOR_DESCRIPTION);
+    tag_list->add_flag("--no-color,-n", no_color, tm_tag::NOCOLOR_DESCRIPTION);
     tag_list->callback( [&]() {
             tm_tag::handle_list(no_color, max_tags);
     });

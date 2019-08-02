@@ -54,7 +54,7 @@ namespace tm_task {
         "List the tasks in reversed chronological order";
 
     const std::string MAX_DESCRIPTION =
-        "The maximum number of tasks to be displayed, by default,\nthe max is 50";
+        "The maximum number of tasks to be displayed";
 
     const std::string LIST_LONG_DESCRIPTION =
         "Also display the tags of each task, and what project the task belongs to";
