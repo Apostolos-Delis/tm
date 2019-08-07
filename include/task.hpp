@@ -16,7 +16,7 @@ namespace tm_task {
     const std::string ADD_DESCRIPTION = "Add a task to the list of tasks";
 
     const std::string DATE_DESCRIPTION =
-        "The due date of the specified task, input format must be dd/mm/yyyy";
+        "The due date of the specified task, input format must be 'YYYY-MM-DD'";
 
     const std::string PROJ_DESCRIPTION =
         "The name of the project the task is part of, by default a task isn't in a project";

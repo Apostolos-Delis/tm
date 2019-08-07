@@ -12,6 +12,7 @@
 #include "task.hpp"
 #include "sess.hpp"
 #include "project.hpp"
+#include "stat.hpp"
 
 
 namespace tm_cli {

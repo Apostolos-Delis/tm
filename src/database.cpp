@@ -205,11 +205,12 @@ void tm_db::TMDatabase::create_tag_table() {
  */
 void tm_db::TMDatabase::create_task_table() {
     const std::string sql = "CREATE TABLE IF NOT EXISTS tasks (\n"
-            "\tid       INTEGER PRIMARY KEY NOT NULL,\n"
-            "\ttask     VARCHAR(128),\n"
-            "\tproj_id  INTEGER DEFAULT NULL,\n"
-            "\tcomplete INTEGER DEFAULT 0 NOT NULL,\n"
-            "\tdue      VARCHAR(24),\n"
+            "\tid        INTEGER PRIMARY KEY NOT NULL,\n"
+            "\ttask      VARCHAR(128),\n"
+            "\tproj_id   INTEGER DEFAULT NULL,\n"
+            "\tcomplete  INTEGER DEFAULT 0 NOT NULL,\n"
+            "\tdue       VARCHAR(24),\n"
+            "\ttime_done VARCHAR(24) DEFAULT NULL,\n"
             "FOREIGN KEY (proj_id) REFERENCES projects(id)\n"
             ");";
     std::string err_message = "SQL error creating tasks table";
@@ -418,8 +419,14 @@ bool tm_db::TMDatabase::valid_task_id(int task_id) {
 void tm_db::TMDatabase::complete_task(int task_id, int val) {
     this->create_task_table();
     std::stringstream ss;
-    ss << "UPDATE tasks\nSET complete = " << val << "\nWHERE id = "
-       << task_id << ";";
+    ss << "UPDATE tasks\nSET complete = " << val;
+    if (val == 1) {
+        std::string time_now = tm_utils::current_datetime() + ":00.000"; 
+        ss << ", time_done = '" << time_now <<  "'";
+    } else {
+        ss << ", time_done = NULL";
+    }
+    ss << "\nWHERE id = " << task_id << ";";
     std::string sql(ss.str());
     this->execute_query(sql, NULL, "SQL error updating task table");
 }
@@ -607,6 +614,12 @@ int static list_tasks_callback_long(void* data, int argc,
         std::cout << "\033[1;39mProject: \033[0m" << argv[4] << std::endl;
     }
 
+    if (argv[6]) {
+        std::string done(argv[6]);
+        std::cout << "\033[1;39mCompleted at: \033[0m" << done.substr(0, 16)
+                  << std::endl;
+    }
+
     /**
      * Here is the query in a more legible fashion, essentially
      * get all the tag components relating to this specific task
@@ -674,7 +687,7 @@ int static list_tasks_callback_long(void* data, int argc,
  * @param[in] specified_proj: only display tags that are due in the
  * specified project
  */
-void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks, 
+void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
                                    bool display_done, bool reversed,
                                    const std::vector<std::string> &specified_tags,
                                    const std::string &specified_date,
@@ -685,8 +698,11 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
 
     std::stringstream ss;
     if (list_long) {
+        this->create_proj_table();
+        this->create_sess_table();
+
         ss << "SELECT DISTINCT tasks.id, tasks.complete, tasks.due, tasks.task, "
-           << "projects.name, SUM(sess.length) FROM tasks\n"
+           << "projects.name, SUM(sess.length), tasks.time_done FROM tasks\n"
            << "LEFT JOIN projects ON tasks.proj_id = projects.id\n"
            << "LEFT JOIN sess ON sess.task_id = tasks.id\n";
     } else {
@@ -724,7 +740,8 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
             auto tag = specified_tags[i];
             int tag_id = this->tag_id(tag);
             if (tag_id == -1) {
-                std::cerr << "ERROR: '" << tag << "' is invalid" << std::endl;
+                std::cerr << "ERROR: '" << tag << "' is an invalid tag"
+                          << std::endl;
                 exit(1);
             }
             if (i != 0) {
@@ -733,7 +750,6 @@ void tm_db::TMDatabase::list_tasks(bool list_long, int max_tasks,
             ss << " task_tags.tag_id = " << tag_id;
         }
         ss << ")\n";
-        ss << "GROUP BY task_tags.task_id\n";
     }
     if (list_long) {
         ss << "GROUP BY tasks.id\n";
@@ -821,7 +837,7 @@ static int list_sess_long(void* data, int argc, char** argv, char** cols) {
     std::string tm_dir = homedir + TM_DIR;
     std::string sess_log_file = tm_dir + SESS_LOG_FILE;
     tm_utils::write_to_file(sess_log_file, ss.str());
-#else 
+#else
     std::cout << ss;
 #endif
     return 0;
@@ -837,7 +853,7 @@ static int list_sess_long(void* data, int argc, char** argv, char** cols) {
  * @param[in] reveresd: Display the sessions in reversed chronological
  * order
  */
-void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions, 
+void tm_db::TMDatabase::sess_log(bool condensed, int max_sessions,
                                  bool reversed) {
     this->create_sess_table();
     this->create_task_table();
@@ -912,7 +928,7 @@ void tm_db::TMDatabase::add_sess(const std::string &start,
     std::stringstream ss_check;
     ss_check << "(SELECT id FROM tasks WHERE id = " << task_id << ")";
     if (this->num_rows(ss_check.str()) != 1) {
-        std::cerr << "ERROR: '" << task_id 
+        std::cerr << "ERROR: '" << task_id
                   << "' is not a valid task id" << std::endl;
         exit(1);
     }

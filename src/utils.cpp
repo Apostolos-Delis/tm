@@ -214,9 +214,10 @@ std::string tm_utils::current_datetime() {
  * @return returns a string of the form H:MM:SS
  */
 std::string tm_utils::sec_to_time(int num_seconds) {
-    int num_hours = num_seconds / 3600;
+    constexpr int sec_per_hour = 60 * 60;
+    int num_hours = num_seconds / sec_per_hour;
     if (num_hours) {
-        num_seconds %= (num_hours * 3600);
+        num_seconds %= (num_hours * sec_per_hour);
     }
     int num_min = num_seconds / 60;
     if (num_min) {

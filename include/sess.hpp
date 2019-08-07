@@ -30,7 +30,7 @@ namespace tm_sess {
 
     const std::string OVERTIME_DESCRIPTION =
         "No overtime means the session will end immediately\nupon reaching the time limit"\
-        "otherwise, the session will keep going until the\nuser stops it";
+        " otherwise, the session will keep going until the\nuser stops it";
 
     const std::string DESC_DESCRIPTION =
         "Add a brief description you plan to do during the session";
