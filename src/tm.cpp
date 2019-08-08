@@ -269,6 +269,28 @@ int main(int argc, char **argv) {
     auto stat = app.add_subcommand("stat", tm_cli::STAT_DESCRIPTION);
     stat->require_subcommand(1);
 
+    // Define stat sum
+    bool sum_task = false;
+    bool sum_all = false;
+    std::string sum_year, sum_from, sum_utill;
+
+    auto stat_sum = stat->add_subcommand("sum", tm_stat::SUM_DESCRIPTION);
+    stat_sum->add_flag("--task,-t", sum_task, tm_stat::TASK_DESCRIPTION);
+    stat_sum->add_flag("--all,-a", sum_task, tm_stat::ALL_DESCRIPTION);
+    stat_sum->add_option("--year,-y", sum_year, tm_stat::YEAR_DESCRIPTION);
+    stat_sum->add_option("--from,-f", sum_from, tm_stat::FROM_DESCRIPTION);
+    stat_sum->add_option("--until,-u", sum_utill, tm_stat::UNTIL_DESCRIPTION);
+    stat_sum->callback( [&]() {
+            if (sum_all && (!sum_year.empty() || !sum_from.empty() 
+                        || !sum_utill.empty())) {
+                std::cerr << "ERROR: cannot specify '--all' flag along with"
+                          << " --year/--from/--until"<< std::endl;
+                exit(1);
+            }
+            tm_stat::handle_summary(sum_task, sum_all, sum_year,
+                                    sum_from, sum_utill);
+    });
+
     CLI11_PARSE(app, argc, argv);
 
     if (argc == 1) {
