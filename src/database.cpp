@@ -146,7 +146,7 @@ int tm_db::TMDatabase::task_id(const std::string &task_name) {
     int task_id = -1;
     int rc;
     // On paper, this should only loop once since tag names should be unique
-    while ( (rc = sqlite3_step(sql)) == SQLITE_ROW) {                                              /* 2 */
+    while ( (rc = sqlite3_step(sql)) == SQLITE_ROW) {
         task_id = sqlite3_column_int(sql, 0);
     }
     return task_id;
@@ -167,7 +167,7 @@ int tm_db::TMDatabase::proj_id(const std::string &proj_name) {
     int proj_id = -1;
     int rc;
     // On paper, this should only loop once since tag names should be unique
-    while ( (rc = sqlite3_step(sql)) == SQLITE_ROW) {                                              /* 2 */
+    while ( (rc = sqlite3_step(sql)) == SQLITE_ROW) {
         proj_id = sqlite3_column_int(sql, 0);
     }
     return proj_id;
@@ -932,15 +932,12 @@ void tm_db::TMDatabase::add_sess(const std::string &start,
                   << "' is not a valid task id" << std::endl;
         exit(1);
     }
-
     std::stringstream ss;
     if (!description.empty()) {
         ss << "INSERT INTO sess (task_id, time_started, desc, length)\nVALUES("
            << task_id << ", '" << start << "', '" << description << "', "
            << sess_length << ")";
-    }
-
-    else {
+    } else {
         ss << "INSERT INTO sess (task_id, time_started, length)\nVALUES("
            << task_id << ", '" << start << "', "
            << sess_length << ")";

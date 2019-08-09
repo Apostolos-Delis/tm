@@ -66,6 +66,28 @@ namespace tm_utils {
     std::string current_datetime();
 
     /**
+     * Description: converts 3 integers into a time_point object, which
+     * allows for easy manipulation across datetime
+     * @param[in] years: integer that is greater than 1900 ideally
+     * @param[in] months: a value from 1 - 12
+     * @param[in] days: a value from 1 - 31
+     * @return Returns a time_point object
+     */
+    auto convert_to_timepoint(int years, int months, int days);
+
+    /**
+     * Description: Returns a new time_point based on how many days to add,
+     * note that if days_to_add is a negative number, then it will subtract days
+     *
+     * @param[in] timepoint: a time_point object
+     * @param[in] days_to_add: The number of days to add
+     * @return Returns a new time_point shifted by the specified amount of days
+     */
+    template <typename Clock, typename Duration>
+    auto add_days(const std::chrono::time_point<Clock, Duration>& timepoint,
+                  int days_to_add);
+
+    /**
      * Description: creates a string out of the number of seconds 
      * @param[in] num_seconds: the number of seconds to convert
      * @return returns a string of the form HH:MM:SS
@@ -90,6 +112,71 @@ namespace tm_utils {
      * @param[in] file_name: the name of the file to remove
      */
     void remove_file(std::string file_name);
+
+}
+
+namespace tm_math {
+
+    /**
+     * Description: Computes the mean of the vector of numbers
+     * @param[in] nums: the vector of numbers
+     * @return returns the average of the values, in the same numeric type as
+     * recieved, so if nums was a vector of ints, the average will be an int
+     */
+    template <typename NumericType>
+    NumericType mean(std::vector<NumericType> nums) {
+        // Check to make sure that the NumericType is arithmentic
+        static_assert(std::is_arithmetic<NumericType>::value,
+                      "NumericType must be numeric");
+
+        NumericType sum = 0;
+        for (auto const& it : nums) {
+            sum += it;
+        }
+        return sum / (NumericType) nums.size();
+    }
+
+
+    /**
+     * Description: Takes in a vector of numeric types, and then returns the
+     * standard deviation, requires the mean to have been precomputed
+     * @param[in] nums: vector of nums
+     * @param[in] mean: the mean of the vector
+     * @return a floating point value of the precomputed value
+     */
+    template <typename NumericType>
+    double standard_dev(std::vector<NumericType> nums, NumericType mean) {
+        static_assert(std::is_arithmetic<NumericType>::value,
+                      "NumericType must be numeric");
+        double sum = 0.0;
+        for (auto const &it : nums) {
+            sum += pow((it - mean), 2);
+        }
+        return sqrt(sum / nums.size());
+    }
+
+
+// This is used in case the max and min values are the same, so
+// that we don't divide by 0
+#define ERR_VAL 0.001
+
+    /**
+     * Description: Normalizes a value to be between 0 and 1
+     * @param[in] val: the value to be normalized
+     * @param[in] min_val: the minimum value from the set of values
+     * @param[in] max_val: the maximum value from the set of values
+     * @return (val - min) / (max - min)
+     */
+    template <typename NumericType>
+    inline double normalize(NumericType val, NumericType min_val,
+                            NumericType max_val) {
+
+        static_assert(std::is_arithmetic<NumericType>::value,
+                      "NumericType must be numeric");
+
+        double max_min = max_val - min_val + ERR_VAL;
+        return (val - min_val + ERR_VAL) / max_min;
+    }
 }
 
 // class for defining colors
@@ -126,6 +213,19 @@ namespace tm_color {
             {"light-cyan", "\033[96m"},
             {"white", "\033[97m"},
             {"none", ""}
+    };
+
+    const std::unordered_set<std::string> VALID_GRADIENTS({
+            "orange", "gray", "green", "blue", "magenta"
+    });
+
+    const std::unordered_map<std::string, 
+          std::vector<int>> GRADIENTS = {
+        {"blue", {87, 51, 45, 39, 33}},
+        {"green", {118, 82, 46, 40, 34}},
+        {"magenta", {225, 219, 213, 201, 165}},
+        {"orange", {220, 214, 208, 202, 196}},
+        {"gray", {255, 250, 244, 238, 232}},
     };
 
     const std::unordered_map<std::string, std::string> BACKGROUNDS = {

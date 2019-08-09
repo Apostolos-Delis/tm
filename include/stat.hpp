@@ -6,7 +6,11 @@
 #define STAT_HPP_
 
 
+#include <iostream>
 #include <string>
+#include <unordered_map>
+#include <vector>
+
 
 namespace tm_stat {
 
@@ -43,12 +47,47 @@ namespace tm_stat {
      * @param[in] until: statistics restricted to data before until date
      *
      * Note: year, from, and until must be a 4 digit number
+     * Stats returned: Mean, Stdev, Total num
      */
     void handle_summary(bool sum_tasks, bool sum_all,
                         const std::string &year,
                         const std::string &from,
                         const std::string &until);
 
+    /**
+     * Description: Class for handling statistics processing
+     */
+    class StatHandler {
+    private:
+        // a map that maps dates -> values
+        std::unordered_map<std::string, double> data_;
+
+        // A list of the values found in data_
+        std::vector<double> vals_;
+
+        // Specifies the starting date and final date in the dataset
+        std::string min_date, max_date;
+
+        /**
+         * Description: loads all the values from data_ into vals_
+         */
+        void load_vals();
+    public:
+
+        /**
+         * @param[in] data: a map that maps dates -> values
+         */
+        StatHandler(const std::unordered_map<std::string, double> &data);
+
+        /**
+         * Description: Outputs a summary about the statistics observed
+         *
+         * Outputs the start date and end date found in the observed data
+         * Outputs mean, standard deviation, and total number of items
+         * observed
+         */
+        void output_summary(std::ostream &out = std::cout);
+    };
 }
 
 #endif // STAT_HPP_
