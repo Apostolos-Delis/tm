@@ -6,6 +6,7 @@
 #include <sqlite3.h>
 
 #include <string>
+#include <cstring>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -1173,4 +1174,57 @@ void tm_db::TMDatabase::list_projects(bool show_tasks, bool display_done,
         callback = list_projects_callback;
     }
     this->execute_query(sql, callback, "SQL error querying projects");
+}
+
+
+std::unordered_map<std::string, double> daily_data;
+
+/**
+ * Callback for populating the daily_data map, used primarily for tm stat 
+ * function calls
+ */
+int static fill_daily_data(void* data, int argc,
+                           char** argv, char** cols) {
+    std::string date(argv[0]);
+    double amount = atoi(argv[1]);
+    daily_data[date] = amount;
+    return 0;
+}
+
+/**
+ * Description: Queries the total amount of 
+ * @param[in] from: the starting date to query from, if it is empty, then
+ * no restriction is added for the starting date
+ * @param[in] until: the end date to query till, if empty no restrictions added
+ * @return Returns a mapping from dates -> time worked
+ */
+std::unordered_map<std::string, double>
+tm_db::TMDatabase::stat_time_query(std::string from, std::string until) {
+    std::stringstream ss;
+
+    ss << "SELECT date(time_started), SUM(length) FROM sess\n";
+    ss << "WHERE 1 = 1\n";
+    if (!from.empty()) {
+        ss << "AND time_started >= '" << from << "'\n";
+    }
+    if (!until.empty()) {
+        ss << "AND time_started <= '" << until << "'\n";
+    }
+    ss << "GROUP BY date(time_started)";
+    this->execute_query(ss.str(), fill_daily_data,
+            "ERROR: Failed to query sessions");
+    return daily_data;
+}
+
+/**
+ * Description: Queries the total amount of 
+ * @param[in] from: the starting date to query from, if it is empty, then
+ * no restriction is added for the starting date
+ * @param[in] until: the end date to query till, if empty no restrictions added
+ * @return Returns a mapping from dates -> time worked
+ */
+std::unordered_map<std::string, double>
+tm_db::TMDatabase::stat_task_query(std::string from, std::string until) {
+    // TODO (21/08/2019): FINISH stat task query
+    return daily_data;
 }

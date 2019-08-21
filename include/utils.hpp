@@ -13,6 +13,9 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <sstream>
+#include <chrono>
+#include <thread>
+#include <iomanip>
 
 
 namespace tm_utils {
@@ -64,28 +67,6 @@ namespace tm_utils {
      * YYYY-MM-DD HH:MM
      */
     std::string current_datetime();
-
-    /**
-     * Description: converts 3 integers into a time_point object, which
-     * allows for easy manipulation across datetime
-     * @param[in] years: integer that is greater than 1900 ideally
-     * @param[in] months: a value from 1 - 12
-     * @param[in] days: a value from 1 - 31
-     * @return Returns a time_point object
-     */
-    auto convert_to_timepoint(int years, int months, int days);
-
-    /**
-     * Description: Returns a new time_point based on how many days to add,
-     * note that if days_to_add is a negative number, then it will subtract days
-     *
-     * @param[in] timepoint: a time_point object
-     * @param[in] days_to_add: The number of days to add
-     * @return Returns a new time_point shifted by the specified amount of days
-     */
-    template <typename Clock, typename Duration>
-    auto add_days(const std::chrono::time_point<Clock, Duration>& timepoint,
-                  int days_to_add);
 
     /**
      * Description: creates a string out of the number of seconds 

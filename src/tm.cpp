@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
             sess_desc, tm_sess::DESC_DESCRIPTION);
     session_add->add_option("--start-date,-s", date_started,
             tm_sess::DATE_DESCRIPTION)->required();
-    session_add->add_option("--time,-t", time_started, 
+    session_add->add_option("--time,-t", time_started,
             tm_sess::TIME_DESCRIPTION);
     session_add->callback( [&]() {
             tm_sess::handle_add(sess_length, task_id, date_started,
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
     task_add->add_option("--proj,-p", proj_name, tm_task::PROJ_DESCRIPTION);
     task_add->add_option("--date,-d", due_date,
             tm_task::DATE_DESCRIPTION)->required();
-    task_add->add_option("--time,-t", due_time, 
+    task_add->add_option("--time,-t", due_time,
                          tm_task::TIME_DESCRIPTION, true);
     task_add->add_option("--tags,-l", tags, tm_task::TAGS_DESCRIPTION);
     task_add->callback( [&]() {
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
     std::string date_till, date_from;
     std::string specified_date, specified_proj;
     auto task_list = task->add_subcommand("list", tm_task::LIST_DESCRIPTION);
-    task_list->add_option("--max,-m", max_tasks, 
+    task_list->add_option("--max,-m", max_tasks,
             tm_task::MAX_DESCRIPTION, true);
     task_list->add_flag("--long,-l", list_long,
             tm_task::LIST_LONG_DESCRIPTION);
@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
             if (display_all) {
                 max_tasks = 0;
             }
-            if (!specified_date.empty() && 
+            if (!specified_date.empty() &&
                     (!date_from.empty() || !date_till.empty())){
                 std::cerr << "ERROR: cannot set both --date and either"
                           << " --from or --after options" << std::endl;
@@ -205,7 +205,7 @@ int main(int argc, char **argv) {
     auto tag_add = tag->add_subcommand("add", tm_tag::ADD_DESCRIPTION);
     tag_add->add_option("--name,-n", tag_name,
             tm_tag::NAME_DESCRIPTION)->required();
-    tag_add->add_option("--color,-c", color, 
+    tag_add->add_option("--color,-c", color,
             tm_tag::COLOR_DESCRIPTION, true);
     tag_add->callback( [&]() {
             tm_tag::handle_add(tag_name, color);
@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
     stat_sum->add_option("--from,-f", sum_from, tm_stat::FROM_DESCRIPTION);
     stat_sum->add_option("--until,-u", sum_utill, tm_stat::UNTIL_DESCRIPTION);
     stat_sum->callback( [&]() {
-            if (sum_all && (!sum_year.empty() || !sum_from.empty() 
+            if (sum_all && (!sum_year.empty() || !sum_from.empty()
                         || !sum_utill.empty())) {
                 std::cerr << "ERROR: cannot specify '--all' flag along with"
                           << " --year/--from/--until"<< std::endl;
@@ -289,6 +289,16 @@ int main(int argc, char **argv) {
             }
             tm_stat::handle_summary(sum_task, sum_all, sum_year,
                                     sum_from, sum_utill);
+    });
+
+    // Define stat grad
+    auto stat_grad = stat->add_subcommand("grad", tm_stat::GRAD_DESCRIPTION);
+    //stat_grad->add_flag("--task,-t", sum_task, tm_stat::TASK_DESCRIPTION);
+    //stat_grad->add_option("--year,-y", sum_year, tm_stat::YEAR_DESCRIPTION);
+    stat_grad->callback( [&]() {
+        // TODO: add task id so that gradient will display stuff only for a specific task or proj
+        // Add Stathandler derived classes for the different task completion / sess length
+        tm_stat::handle_grad();
     });
 
     CLI11_PARSE(app, argc, argv);

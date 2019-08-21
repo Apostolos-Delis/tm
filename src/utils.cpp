@@ -7,7 +7,6 @@
 #include <sys/types.h>
 #include <stdlib.h> 
 #include <ctime>
-#include <math.h>
 #include <pwd.h>
 
 #include <string>
@@ -211,66 +210,6 @@ std::string tm_utils::current_datetime() {
     return ret;
 }
 
-
-/**
- * Description: converts 3 integers into a time_point object, which
- * allows for easy manipulation across datetime
- * @param[in] years: integer that is greater than 1900 ideally
- * @param[in] months: a value from 1 - 12
- * @param[in] days: a value from 1 - 31
- * @return Returns a time_point object
- */
-auto tm_utils::convert_to_timepoint(int years, int months, int days) {
-    if (!checkdate(months, days, years)) {
-        std::cerr << "ERROR: Received an invalid timepoint to convert!"
-                  << std::endl;
-        exit(1);
-    }
-    --months; // Months needs to be from 0-11 not 1-12
-    years -= 1900;
-    std::tm date = {};
-    date.tm_year = years;
-    date.tm_mon = months;
-    date.tm_mday = days;
-    return std::chrono::system_clock::from_time_t(std::mktime(&date));
-}
-
-
-/**
- * Description: Operator overload to allow for chrono timestamps
- * to be converted to strings
- * @param[in] os: the output stream to send the output to
- * @param[in] timep: the time_point as calculated from convert_to_timepoint
- * @return Returns
- */
-template <typename Clock, typename Duration>
-std::ostream& operator<<(std::ostream& os,
-        const std::chrono::time_point<Clock, Duration>& timep) {
-
-    auto converted_timep = Clock::to_time_t(timep);
-    os << std::put_time(std::localtime(&converted_timep), "%Y-%m-%d");
-    return os;
-}
-
-
-/**
- * Description: Returns a new time_point based on how many days to add,
- * note that if days_to_add is a negative number, then it will subtract days
- *
- * @param[in] timepoint: a time_point object
- * @param[in] days_to_add: The number of days to add
- * @return Returns a new time_point shifted by the specified amount of days
- */
-template <typename Clock, typename Duration>
-auto add_days(const std::chrono::time_point<Clock, Duration>& timepoint,
-              int days_to_add) {
-    constexpr std::time_t seconds_in_day = 60 * 60 * 24;
-    //                                     mm   hh   dd
-
-    std::time_t days = seconds_in_day * days_to_add;
-    auto date = Clock::to_time_t(timepoint);
-    return Clock::from_time_t(date + days);
-}
 
 /**
  * Description: creates a string out of the number of seconds 

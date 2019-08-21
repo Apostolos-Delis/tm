@@ -22,8 +22,9 @@
 
 // The length of the progress bar
 #define BAR_WIDTH 70
+
 // Maximum session length is 3 hours
-#define MAX_SESS_LENGTH 3 * 60
+#define MAX_SESS_LENGTH 180
 
 
 // Global variables relating to the session, allows for access within
@@ -50,7 +51,7 @@ void print_bar(double progress, int bar_width) {
             else if (i == pos) std::cout << "▶";
             else std::cout << " ";
         }
-        std::cout << "]  " << int(progress * 100.0);
+        std::cout << "]  " << int(progress * 100.0) << "% ";
 }
 
 
@@ -97,7 +98,7 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
                   << std::endl;
     }
 
-    if (sess_length > MAX_SESS_LENGTH * 60) {
+    if (sess_length > MAX_SESS_LENGTH) {
         std::cerr << "Session exceeds maximum limit" << std::endl;
         std::cerr << "Capping session time to " << MAX_SESS_LENGTH
                   << " minutes." <<  std::endl;
@@ -127,7 +128,7 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
 
     // Initialize the progress bar with zeros
     print_bar(0.0, BAR_WIDTH);
-    std::cout << "% Time Left: "
+    std::cout << "Time Left: "
               << tm_utils::sec_to_time(temp_seconds) << " (H:MM:SS)\r";
     std::cout.flush();
 
@@ -148,8 +149,8 @@ void tm_sess::handle_start(int sess_length, bool no_interupt,
 
         // Update progress bar
         print_bar(progress, BAR_WIDTH);
-        std::cout << "% Time Left: "
-                  << tm_utils::sec_to_time(temp_seconds) << " \r";
+        std::cout << "Time Left: "
+                  << tm_utils::sec_to_time(temp_seconds) << " (H:MM:SS)\r";
         std::cout.flush();
     }
     std::cout << std::endl;

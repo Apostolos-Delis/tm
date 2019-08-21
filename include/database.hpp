@@ -296,6 +296,26 @@ namespace tm_db {
         void list_projects(bool show_tasks, bool display_done,
                            const std::vector<std::string> &proj_names);
 
+
+        /**
+         * Description: Queries the total amount of 
+         * @param[in] from: the starting date to query from, if it is empty, then
+         * no restriction is added for the starting date
+         * @param[in] until: the end date to query till, if empty no restrictions added
+         * @return Returns a mapping from dates -> time worked
+         */
+        std::unordered_map<std::string, double>
+        stat_time_query(std::string from, std::string until);
+
+        /**
+         * Description: Queries the total amount of 
+         * @param[in] from: the starting date to query from, if it is empty, then
+         * no restriction is added for the starting date
+         * @param[in] until: the end date to query till, if empty no restrictions added
+         * @return Returns a mapping from dates -> time worked
+         */
+        std::unordered_map<std::string, double>
+        stat_task_query(std::string from, std::string until);
     };
 }
 

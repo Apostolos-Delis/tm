@@ -37,6 +37,8 @@ namespace tm_stat {
         "Only summarize statistics from data up to this date"
         "\nFormat: 'YYYY'";
 
+    const std::string GRAD_DESCRIPTION =
+        "Display a heatmap of various progress metrics";
     /**
      * Description: prints a summar
      * @param[in] sum_tasks: print a summary related to tasks, not about time
@@ -55,6 +57,12 @@ namespace tm_stat {
                         const std::string &until);
 
     /**
+     * Description: Displays a gradient heatmap of the progress  worked on
+     * TODO: Add more options for this like task id and proj id
+     */
+    void handle_grad();
+
+    /**
      * Description: Class for handling statistics processing
      */
     class StatHandler {
@@ -71,7 +79,7 @@ namespace tm_stat {
         /**
          * Description: loads all the values from data_ into vals_
          */
-        void load_vals();
+        inline void load_vals();
     public:
 
         /**
@@ -87,6 +95,14 @@ namespace tm_stat {
          * observed
          */
         void output_summary(std::ostream &out = std::cout);
+
+        /**
+        * Description: Prints a gradient map of your progress, in a similar style to
+        * Github with its contribution chart
+        * @param[in] color: the color of the gradient, must be a valid color from the
+        * tm_color::VALID_GRADIENTS set
+        */
+        void gradient_map(std::string color = "green", std::ostream &out = std::cout);
     };
 }
 
