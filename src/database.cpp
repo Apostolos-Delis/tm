@@ -422,7 +422,7 @@ void tm_db::TMDatabase::complete_task(int task_id, int val) {
     std::stringstream ss;
     ss << "UPDATE tasks\nSET complete = " << val;
     if (val == 1) {
-        std::string time_now = tm_utils::current_datetime() + ":00.000"; 
+        std::string time_now = tm_utils::current_datetime() + ":00.000";
         ss << ", time_done = '" << time_now <<  "'";
     } else {
         ss << ", time_done = NULL";
@@ -1180,7 +1180,7 @@ void tm_db::TMDatabase::list_projects(bool show_tasks, bool display_done,
 std::unordered_map<std::string, double> daily_data;
 
 /**
- * Callback for populating the daily_data map, used primarily for tm stat 
+ * Callback for populating the daily_data map, used primarily for tm stat
  * function calls
  */
 int static fill_daily_data(void* data, int argc,
@@ -1192,14 +1192,15 @@ int static fill_daily_data(void* data, int argc,
 }
 
 /**
- * Description: Queries the total amount of 
+ * Description: Queries the total amount of
  * @param[in] from: the starting date to query from, if it is empty, then
  * no restriction is added for the starting date
  * @param[in] until: the end date to query till, if empty no restrictions added
  * @return Returns a mapping from dates -> time worked
  */
 std::unordered_map<std::string, double>
-tm_db::TMDatabase::stat_time_query(std::string from, std::string until) {
+tm_db::TMDatabase::stat_time_query(const std::string &from,
+                                   const std::string &until) {
     std::stringstream ss;
 
     ss << "SELECT date(time_started), SUM(length) FROM sess\n";
@@ -1217,14 +1218,15 @@ tm_db::TMDatabase::stat_time_query(std::string from, std::string until) {
 }
 
 /**
- * Description: Queries the total amount of 
+ * Description: Queries the total amount of
  * @param[in] from: the starting date to query from, if it is empty, then
  * no restriction is added for the starting date
  * @param[in] until: the end date to query till, if empty no restrictions added
  * @return Returns a mapping from dates -> time worked
  */
 std::unordered_map<std::string, double>
-tm_db::TMDatabase::stat_task_query(std::string from, std::string until) {
+tm_db::TMDatabase::stat_task_query(const std::string &from,
+                                   const std::string &until) {
     // TODO (21/08/2019): FINISH stat task query
     return daily_data;
 }

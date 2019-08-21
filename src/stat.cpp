@@ -259,7 +259,7 @@ void tm_stat::StatHandler::gradient_map(std::string color, std::ostream &out) {
     int month = stoi(now.substr(5, 2));
     int day = stoi(now.substr(8, 2));
 
-    std::cout << "Current Day: " << now << std::endl;
+    out << "Current Day: " << now << std::endl;
 
     auto date = convert_to_timepoint(year, month, day);
 
@@ -308,15 +308,15 @@ void tm_stat::StatHandler::gradient_map(std::string color, std::ostream &out) {
     const std::vector<std::string> MONTHS = {"Jan ", "Feb ", "Mar ", "Apr ", "May ", "Jun ",
                                              "Jul ", "Aug ", "Sep ", "Oct ", "Nov ", "Dec"};
 
-    std::cout << "Less ";
+    out << "Less ";
     for (int i = 0; i < grad_size; ++i) {
         auto temp_val = tm_color::GRADIENTS.find(color)->second[i];
-            std::cout << "\033[38;5;" << temp_val << "m▦ " << "\033[0m";
+            out << "\033[38;5;" << temp_val << "m▦ " << "\033[0m";
     }
-    std::cout << "More" << std::endl;
+    out << "More" << std::endl;
 
     // Print Month bar
-    std::cout << "Month: ";
+    out << "Month: ";
     int cur_month = month;
     int num_months = 0;
     std::string month_out;
@@ -327,21 +327,21 @@ void tm_stat::StatHandler::gradient_map(std::string color, std::ostream &out) {
         day = stoi(ss.str().substr(8, 2));
         if (cur_month != month && !(cur_month == 0 && month == 12)) {
             month_out = MONTHS[month - 1];
-            std::cout << month_out;
+            out << month_out;
             cur_month = month % 12;
             num_months++;
         }
         else if (day > 13 && num_months != 12) {
-            std::cout << "  ";
+            out << "  ";
         }
     }
-    std::cout << std::endl;
+    out << std::endl;
 
     for (int j = 0; j < 7; ++j) {
-        std::cout << DAYS[j] << ":   ";
+        out << DAYS[j] << ":   ";
         for (int i = j; i < progress.size(); i+= 7) {
-            std::cout << progress[i];
+            out << progress[i];
         }
-        std::cout << "\033[0m" << std::endl;
+        out << "\033[0m" << std::endl;
     }
 }

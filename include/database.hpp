@@ -305,7 +305,7 @@ namespace tm_db {
          * @return Returns a mapping from dates -> time worked
          */
         std::unordered_map<std::string, double>
-        stat_time_query(std::string from, std::string until);
+        stat_time_query(const std::string &from, const std::string &until);
 
         /**
          * Description: Queries the total amount of 
@@ -315,7 +315,7 @@ namespace tm_db {
          * @return Returns a mapping from dates -> time worked
          */
         std::unordered_map<std::string, double>
-        stat_task_query(std::string from, std::string until);
+        stat_task_query(const std::string &from, const std::string &until);
     };
 }
 
