@@ -36,3 +36,6 @@ build/Makefile
 # Temporary files
 tmp/
 *.db
+
+#MacOS
+.DS_Store

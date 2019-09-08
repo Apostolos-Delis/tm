@@ -7,6 +7,8 @@
 #define UTILS_HPP_
 
 #include <sys/stat.h>
+#include <sys/ioctl.h> 
+#include <unistd.h>
 
 #include <string>
 #include <vector>
@@ -94,6 +96,14 @@ namespace tm_utils {
      */
     void remove_file(std::string file_name);
 
+    /**
+     * Description: Returns the number of columns in the terminal
+     */
+    inline int num_cols() {
+        struct winsize size;
+        ioctl(STDOUT_FILENO,TIOCGWINSZ,&size);
+        return size.ws_col;
+    }
 }
 
 namespace tm_math {

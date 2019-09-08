@@ -20,8 +20,17 @@
       __typeof__ (b) _b = (b); \
     _a < _b ? _a : _b; })
 
+#define MAX(a,b) \
+  ({ __typeof__ (a) _a = (a); \
+      __typeof__ (b) _b = (b); \
+    _a > _b ? _a : _b; })
+
+#define MIN_BAR_LENGTH 10
+#define TEXT_LEN 40
+
 // The length of the progress bar
-#define BAR_WIDTH 70
+#define BAR_WIDTH (MAX(tm_utils::num_cols() - TEXT_LEN, \
+            MIN_BAR_LENGTH))
 
 // Maximum session length is 3 hours
 #define MAX_SESS_LENGTH 180
@@ -44,14 +53,17 @@ static bool nointerrupt;
  * the bar to take up
  */
 void print_bar(double progress, int bar_width) {
-        std::cout << "[";
-        int pos = bar_width * progress;
-        for (int i = 0; i < bar_width; ++i) {
-            if (i < pos || (i == pos && progress >= 1.0)) std::cout << "▦";
-            else if (i == pos) std::cout << "▶";
-            else std::cout << " ";
-        }
-        std::cout << "]  " << int(progress * 100.0) << "% ";
+    if (bar_width < MIN_BAR_LENGTH) {
+        return;
+    }
+    std::cout << "[";
+    int pos = bar_width * progress;
+    for (int i = 0; i < bar_width; ++i) {
+        if (i < pos || (i == pos && progress >= 1.0)) std::cout << "▦";
+        else if (i == pos) std::cout << "▶";
+        else std::cout << " ";
+    }
+    std::cout << "]  " << int(progress * 100.0) << "% ";
 }
 
 
