@@ -100,9 +100,17 @@ namespace tm_utils {
      * Description: Returns the number of columns in the terminal
      */
     inline int num_cols() {
+#ifndef _WIN32
         struct winsize size;
         ioctl(STDOUT_FILENO,TIOCGWINSZ,&size);
         return size.ws_col;
+#else
+#include <windows.h>
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+        int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+        return columns;
+#endif
     }
 }
 
