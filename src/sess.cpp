@@ -9,6 +9,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <iomanip>
 
 #include "sess.hpp"
 #include "database.hpp"
@@ -63,7 +64,8 @@ void print_bar(double progress, int bar_width) {
         else if (i == pos) std::cout << "▶";
         else std::cout << " ";
     }
-    std::cout << "]  " << int(progress * 100.0) << "% ";
+    std::cout << "]  " << std::setw(2) << std::setfill(' ') 
+        << int(progress * 100.0) << "% ";
 }
 
 

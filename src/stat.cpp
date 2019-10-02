@@ -163,6 +163,8 @@ void tm_stat::StatHandler::output_summary(std::ostream &out) {
     auto mean = tm_math::mean(this->vals_);
     auto stdev = tm_math::standard_dev(this->vals_, mean);
     auto total_days = day_diff(this->min_date, this->max_date);
+    total_days = total_days == 0 ? 1 : total_days;
+
     auto total_mean = (mean * this->vals_.size()) / total_days;
 
     out << "\033[1;4;39mDisplaying Statistical Summary\033[0m" << std::endl;
@@ -170,7 +172,7 @@ void tm_stat::StatHandler::output_summary(std::ostream &out) {
     out << "Earliest datapoint: '" << this->min_date << "'\n";
     out << "Latest datapoint: '" << this->max_date << "'\n\n";
     out << "Total days in between: " << total_days << std::endl;
-    out << "Average value for days this->data_ed: " << std::setw(2) << mean << std::endl;
+    out << "Average value for days is: " << std::setw(2) << mean << std::endl;
     out << "Standard deviation: " << std::setw(2) << stdev << std::endl;
     out << "Average value for all days: " << std::setw(2) << total_mean << std::endl;
     out << "Total number of datapoints observed: " << this->vals_.size()
